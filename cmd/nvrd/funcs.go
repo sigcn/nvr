@@ -2,9 +2,10 @@ package main
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"io"
 	"net/http"
+
+	"storj.io/common/base58"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
@@ -24,5 +25,5 @@ func corsMiddleware(next http.Handler) http.Handler {
 func generateID() string {
 	b := make([]byte, 32)
 	io.ReadFull(rand.Reader, b)
-	return base64.StdEncoding.EncodeToString(b)
+	return base58.Encode(b)
 }

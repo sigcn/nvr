@@ -44,3 +44,7 @@ func Err(err error) Error {
 func Ok(data any) Data {
 	return Data{Data: data}
 }
+
+func ErrForbidden(err error) Error {
+	return Error{Code: 4030, Msg: fmt.Errorf("forbidden: %w", err).Error()}
+}

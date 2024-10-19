@@ -6,6 +6,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/use-go/onvif v0.0.9
+	storj.io/common v0.0.0-20241014122736-47dfa836934a
 )
 
 require (
@@ -16,6 +17,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/juju/errors v0.0.0-20220331221717-b38fca44723b // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 )

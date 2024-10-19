@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/rs/zerolog"
+	"github.com/sigcn/nvr/account"
 	"github.com/sigcn/nvr/camera"
 	"github.com/sigcn/nvr/recorder"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -41,19 +42,21 @@ func main() {
 	httpserver := server{
 		cameraStore:     &camera.FileStore{Path: filepath.Join(storePath, "cameras")},
 		recorderManager: &recorder.Manager{},
+		apiKeyStore:     &account.SimpleApiKeyStore{Path: storePath},
 	}
 
-	reloadCameras(httpserver.cameraStore, httpserver.recorderManager)
+	go httpserver.watchProcessSignal()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET    /media/{camera_id}/live.ts", httpserver.handleMediaMPEGTS)
+	mux.HandleFunc("POST   /v1/api/keys", httpserver.handleCreateApiKey)
 	mux.HandleFunc("POST   /v1/api/cameras", httpserver.handleCreateCamera)
 	mux.HandleFunc("GET    /v1/api/cameras", httpserver.handleListCameras)
 	mux.HandleFunc("DELETE /v1/api/cameras/{camera_id}", httpserver.handleDeleteCamera)
 	mux.HandleFunc("PATCH  /v1/api/cameras/{camera_id}/remark", httpserver.handleUpdateCameraRemark)
 	mux.HandleFunc("POST   /v1/api/cameras/reload", httpserver.handleReloadCameras)
 
-	if err := http.ListenAndServe(listen, corsMiddleware(mux)); err != nil {
+	if err := http.ListenAndServe(listen, httpserver.middlewareApiKey(corsMiddleware(mux))); err != nil {
 		panic(err)
 	}
 }
@@ -74,5 +77,5 @@ func reloadCameras(cameraStore camera.Store, recorderManager *recorder.Manager) 
 			slog.Error("Boot", "op", "add", "err", err)
 		}
 	}
-	slog.Info("Cameras load over", "count", recorderManager.Count())
+	slog.Info("Cameras load", "count", recorderManager.Count())
 }

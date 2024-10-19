@@ -2,9 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 	"path/filepath"
+	"strings"
+	"syscall"
 
+	"github.com/sigcn/nvr/account"
 	"github.com/sigcn/nvr/camera"
 	"github.com/sigcn/nvr/recorder"
 )
@@ -27,9 +34,43 @@ type UpdateRemark struct {
 	Remark string `json:"remark"`
 }
 
+type CreateApiKey struct {
+	ID       string `json:"id"`
+	Password string `json:"password"`
+}
+
+type CreateApiKeyResponse struct {
+	Key  string       `json:"key"`
+	User account.User `json:"user"`
+}
+
 type server struct {
 	cameraStore     camera.Store
 	recorderManager *recorder.Manager
+	apiKeyStore     account.ApiKeyStore
+}
+
+func (s *server) handleCreateApiKey(w http.ResponseWriter, r *http.Request) {
+	var req CreateApiKey
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		ErrBadRequest.MarshalTo(w)
+		return
+	}
+	storedPassword := os.Getenv("NVRD_ADMIN_PASSWORD")
+	if storedPassword == "" {
+		storedPassword = "admin"
+	}
+	if req.ID != "admin" || req.Password != storedPassword {
+		ErrForbidden(errors.New("user or password invalid")).MarshalTo(w)
+		return
+	}
+	user := account.User{ID: "admin", Name: "Administrator"}
+	apiKey, err := s.apiKeyStore.Create(user)
+	if err != nil {
+		Err(err).MarshalTo(w)
+		return
+	}
+	Ok(CreateApiKeyResponse{Key: apiKey, User: user}).MarshalTo(w)
 }
 
 func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
@@ -127,4 +168,49 @@ func (s *server) handleUpdateCameraRemark(w http.ResponseWriter, r *http.Request
 func (s *server) handleReloadCameras(w http.ResponseWriter, r *http.Request) {
 	reloadCameras(s.cameraStore, s.recorderManager)
 	Ok(nil).MarshalTo(w)
+}
+
+func (s *server) middlewareApiKey(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/v1/api/keys") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		apiKey := r.URL.Query().Get("api_key")
+		if apiKey == "" {
+			apiKey = r.Header.Get("X-ApiKey")
+		}
+		u, err := s.apiKeyStore.Verify(apiKey)
+		if err != nil {
+			ErrForbidden(err).MarshalTo(w)
+			return
+		}
+		r.Header.Set("X-UID", u.ID)
+		r.Header.Set("X-User", u.Name)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *server) watchProcessSignal() {
+	reloadCameras(s.cameraStore, s.recorderManager)
+	processSig := make(chan os.Signal, 1)
+	signal.Notify(processSig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+	for {
+		sig := <-processSig
+		switch sig {
+		case os.Interrupt, syscall.SIGTERM:
+			if err := s.apiKeyStore.(*account.SimpleApiKeyStore).Save(); err != nil {
+				slog.Warn("Api key store", "event", "save", "err", err)
+			}
+			os.Exit(0)
+		case syscall.SIGHUP:
+			reloadCameras(s.cameraStore, s.recorderManager)
+			if err := s.apiKeyStore.(*account.SimpleApiKeyStore).Load(); err != nil {
+				slog.Warn("Api key store", "event", "load", "err", err)
+			}
+		default:
+			slog.Info("Signal", "sig", sig)
+		}
+	}
 }
