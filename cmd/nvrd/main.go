@@ -43,7 +43,23 @@ func main() {
 		recorderManager: &recorder.Manager{},
 	}
 
-	cameras, err := httpserver.cameraStore.List()
+	reloadCameras(httpserver.cameraStore, httpserver.recorderManager)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET    /media/{camera_id}/live.ts", httpserver.handleMediaMPEGTS)
+	mux.HandleFunc("POST   /v1/api/cameras", httpserver.handleCreateCamera)
+	mux.HandleFunc("GET    /v1/api/cameras", httpserver.handleListCameras)
+	mux.HandleFunc("DELETE /v1/api/cameras/{camera_id}", httpserver.handleDeleteCamera)
+	mux.HandleFunc("PATCH  /v1/api/cameras/{camera_id}/remark", httpserver.handleUpdateCameraRemark)
+	mux.HandleFunc("POST   /v1/api/cameras/reload", httpserver.handleReloadCameras)
+
+	if err := http.ListenAndServe(listen, corsMiddleware(mux)); err != nil {
+		panic(err)
+	}
+}
+
+func reloadCameras(cameraStore camera.Store, recorderManager *recorder.Manager) {
+	cameras, err := cameraStore.List()
 	if err != nil {
 		panic(err)
 	}
@@ -54,20 +70,9 @@ func main() {
 			slog.Error("Boot", "op", "get stream url", "err", err)
 			continue
 		}
-		if err := httpserver.recorderManager.Add(cam.ID(), streamURL, filepath.Join(storePath, "videos")); err != nil {
+		if err := recorderManager.Add(cam.ID(), streamURL, filepath.Join(storePath, "videos")); err != nil {
 			slog.Error("Boot", "op", "add", "err", err)
 		}
 	}
-	slog.Info("Cameras load over", "count", httpserver.recorderManager.Count())
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET    /media/{camera_id}/live.ts", httpserver.handleMediaMPEGTS)
-	mux.HandleFunc("POST   /v1/api/cameras", httpserver.handleCreateCamera)
-	mux.HandleFunc("GET    /v1/api/cameras", httpserver.handleListCameras)
-	mux.HandleFunc("DELETE /v1/api/cameras/{camera_id}", httpserver.handleDeleteCamera)
-	mux.HandleFunc("PATCH  /v1/api/cameras/{camera_id}/remark", httpserver.handleUpdateCameraRemark)
-	err = http.ListenAndServe(listen, corsMiddleware(mux))
-	if err != nil {
-		panic(err)
-	}
+	slog.Info("Cameras load over", "count", recorderManager.Count())
 }

@@ -37,7 +37,12 @@ func (m *Manager) Live(id string) (Recorder, error) {
 }
 
 func (m *Manager) Add(id string, streamURL, storePath string) error {
+	if _, ok := m.liveRecorders[id]; ok {
+		return nil
+	}
+
 	m.init()
+
 	liveRecorder := LiveRecorder{StreamURL: streamURL}
 	fsRecorder := FSRecorder{StreamURL: streamURL, Path: storePath}
 

@@ -123,3 +123,8 @@ func (s *server) handleUpdateCameraRemark(w http.ResponseWriter, r *http.Request
 	}
 	Ok(nil).MarshalTo(w)
 }
+
+func (s *server) handleReloadCameras(w http.ResponseWriter, r *http.Request) {
+	reloadCameras(s.cameraStore, s.recorderManager)
+	Ok(nil).MarshalTo(w)
+}
