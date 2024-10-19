@@ -33,6 +33,7 @@ retry:
 	s := ffmpeg.Input(r.StreamURL,
 		ffmpeg.KwArgs{"rtsp_transport": "tcp"},
 		ffmpeg.KwArgs{"buffer_size": "8192k"},
+		ffmpeg.KwArgs{"timeout": "2000000"},
 		ffmpeg.KwArgs{"strict": -2}).
 		Output(filepath.Join(r.Path, "%Y-%m", "%d_%H-%M-%S.ts"),
 			ffmpeg.KwArgs{"c:v": "copy"},

@@ -85,3 +85,7 @@ func (m *Manager) Delete(id string) error {
 	}
 	return nil
 }
+
+func (m *Manager) Count() int {
+	return len(m.liveRecorders)
+}

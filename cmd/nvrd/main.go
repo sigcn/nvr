@@ -58,6 +58,7 @@ func main() {
 			slog.Error("Boot", "op", "add", "err", err)
 		}
 	}
+	slog.Info("Cameras load over", "count", httpserver.recorderManager.Count())
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET    /media/{camera_id}/live.ts", httpserver.handleMediaMPEGTS)

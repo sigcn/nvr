@@ -23,6 +23,7 @@ func (r *LiveRecorder) Run() error {
 	return ffmpeg.Input(r.StreamURL,
 		ffmpeg.KwArgs{"rtsp_transport": "tcp"},
 		ffmpeg.KwArgs{"buffer_size": "8192k"},
+		ffmpeg.KwArgs{"timeout": "2000000"},
 		ffmpeg.KwArgs{"strict": -2}).WithOutput(r).Output("-", ffmpeg.KwArgs{"c:v": "copy"},
 		ffmpeg.KwArgs{"c:a": "aac"}, ffmpeg.KwArgs{"f": "mpegts"}).Run()
 }

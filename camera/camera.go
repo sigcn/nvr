@@ -2,6 +2,7 @@ package camera
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -100,6 +101,9 @@ func (cam *ONVIFCamera) Remark() string {
 }
 
 func (cam *ONVIFCamera) StreamURL() (string, error) {
+	if cam.profiles == nil {
+		return "", errors.New("offline")
+	}
 	r, err := sdkmedia.Call_GetStreamUri(context.Background(), cam.device, media.GetStreamUri{ProfileToken: cam.profiles[0].Token})
 	if err != nil {
 		return "", fmt.Errorf("onvif: get stream uri: %w", err)
