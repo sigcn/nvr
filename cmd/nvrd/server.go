@@ -172,11 +172,14 @@ func (s *server) handleReloadCameras(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) middlewareApiKey(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.URL.Path, "/v1/api/") || !strings.HasPrefix(r.URL.Path, "/media/") {
+			next.ServeHTTP(w, r)
+			return
+		}
 		if strings.HasPrefix(r.URL.Path, "/v1/api/keys") {
 			next.ServeHTTP(w, r)
 			return
 		}
-
 		apiKey := r.URL.Query().Get("api_key")
 		if apiKey == "" {
 			apiKey = r.Header.Get("X-ApiKey")
