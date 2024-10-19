@@ -68,7 +68,7 @@ func (r *LiveRecorder) AddWriter(id string, w io.Writer) <-chan struct{} {
 	defer r.writersMux.Unlock()
 	c := make(chan struct{})
 	r.writers[id] = notifyWriter{w: w, c: c, id: id}
-	slog.Info("Live recorder writer", "event", "add", "id", id)
+	slog.Info("Live recorder", "event", "add-writer", "id", id)
 	return c
 }
 
@@ -79,7 +79,7 @@ func (r *LiveRecorder) DelWriter(id string) {
 	r.writersMux.Lock()
 	defer r.writersMux.Unlock()
 	delete(r.writers, id)
-	slog.Info("Live recorder writer", "event", "del", "id", id)
+	slog.Info("Live recorder", "event", "del-writer", "id", id)
 }
 
 type notifyWriter struct {

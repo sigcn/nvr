@@ -56,7 +56,7 @@ func (m *Manager) Add(id string, streamURL, storePath string) error {
 			}
 			if err := liveRecorder.Run(); err != nil {
 				slog.Error("Live recorder", "event", "exited", "err", err)
-				time.Sleep(time.Second)
+				time.Sleep(3 * time.Second)
 			}
 		}
 	}()
@@ -68,7 +68,7 @@ func (m *Manager) Add(id string, streamURL, storePath string) error {
 			}
 			if err := fsRecorder.Run(); err != nil {
 				slog.Error("FS recorder", "event", "exited", "err", err)
-				time.Sleep(time.Second)
+				time.Sleep(3 * time.Second)
 			}
 		}
 	}()
