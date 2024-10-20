@@ -59,7 +59,7 @@ func main() {
 	mux.HandleFunc("POST   /v1/api/cameras/reload", httpserver.handleReloadCameras)
 	mux.HandleFunc("GET    /", handleStaticFiles)
 
-	if err := http.ListenAndServe(listen, httpserver.middlewareApiKey(corsMiddleware(mux))); err != nil {
+	if err := http.ListenAndServe(listen, corsMiddleware(httpserver.middlewareApiKey(mux))); err != nil {
 		panic(err)
 	}
 }
