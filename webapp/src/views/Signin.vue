@@ -20,7 +20,7 @@ async function signIn() {
     return
   }
   window.localStorage.setItem('session', JSON.stringify(r.data))
-  window.location.href = '/cameras'
+  window.location.href = '/'
 }
 </script>
 

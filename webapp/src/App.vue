@@ -1,6 +1,6 @@
 <script setup>
-import LoginView from './views/LoginView.vue'
-import HomeView from './views/HomeView.vue'
+import SigninView from './views/Signin.vue'
+import MainView from './views/Main.vue'
 import { ref, onMounted } from 'vue'
 
 const session = ref()
@@ -12,6 +12,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <LoginView v-if="!session" />
-  <HomeView v-else />
+  <SigninView v-if="!session" />
+  <MainView v-else />
 </template>

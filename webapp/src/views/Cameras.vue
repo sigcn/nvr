@@ -34,7 +34,7 @@ function initMpegts(videoElement, streamURL) {
       });
       player.attachMediaElement(videoElement);
       player.load()
-      videoElement.addEventListener('click', () => {player.play()})
+      player.play()
   }
 }
 </script>
