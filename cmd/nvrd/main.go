@@ -64,25 +64,6 @@ func main() {
 	}
 }
 
-func reloadCameras(cameraStore camera.Store, recorderManager *recorder.Manager) {
-	cameras, err := cameraStore.List()
-	if err != nil {
-		panic(err)
-	}
-
-	for _, cam := range cameras {
-		streamURL, err := cam.StreamURL()
-		if err != nil {
-			slog.Error("Boot", "op", "get stream url", "err", err)
-			continue
-		}
-		if err := recorderManager.Add(cam.ID(), streamURL, filepath.Join(storePath, "videos")); err != nil {
-			slog.Error("Boot", "op", "add", "err", err)
-		}
-	}
-	slog.Info("Cameras load", "count", recorderManager.Count())
-}
-
 func handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 	f, err := static.FS.Open(strings.TrimPrefix(r.URL.Path, "/"))
 	if err != nil {

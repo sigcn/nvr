@@ -203,6 +203,7 @@ func (s *server) watchProcessSignal() {
 		sig := <-processSig
 		switch sig {
 		case os.Interrupt, syscall.SIGTERM:
+			stopCameras(s.cameraStore, s.recorderManager)
 			if err := s.apiKeyStore.(*account.SimpleApiKeyStore).Save(); err != nil {
 				slog.Warn("Api key store", "event", "save", "err", err)
 			}
@@ -216,4 +217,35 @@ func (s *server) watchProcessSignal() {
 			slog.Info("Signal", "sig", sig)
 		}
 	}
+}
+
+func reloadCameras(cameraStore camera.Store, recorderManager *recorder.Manager) {
+	cameras, err := cameraStore.List()
+	if err != nil {
+		panic(err)
+	}
+	for _, cam := range cameras {
+		streamURL, err := cam.StreamURL()
+		if err != nil {
+			slog.Error("Boot", "op", "get stream url", "err", err)
+			continue
+		}
+		if err := recorderManager.Add(cam.ID(), streamURL, filepath.Join(storePath, "videos")); err != nil {
+			slog.Error("Boot", "op", "add", "err", err)
+		}
+	}
+	slog.Info("Cameras load", "live-count", recorderManager.Count())
+}
+
+func stopCameras(cameraStore camera.Store, recorderManager *recorder.Manager) {
+	cameras, err := cameraStore.List()
+	if err != nil {
+		panic(err)
+	}
+	for _, cam := range cameras {
+		if err := recorderManager.Delete(cam.ID()); err != nil {
+			slog.Error("Boot", "op", "add", "err", err)
+		}
+	}
+	slog.Info("Cameras stop", "live-count", recorderManager.Count())
 }
