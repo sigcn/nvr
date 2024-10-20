@@ -16,9 +16,9 @@ onMounted(async () => {
 })
 
 async function loadCameras(session) {
-  let r = await http.get('/v1/api/cameras', {session: session})
+  let r = await http.get('/v1/api/cameras', { session: session })
   console.log(r)
-  if(r.code != 0) {
+  if (r.code != 0) {
     return
   }
   console.log(r.data)
@@ -27,36 +27,42 @@ async function loadCameras(session) {
 
 function initMpegts(videoElement, streamURL) {
   if (mpegts.getFeatureList().mseLivePlayback) {
-      var player = mpegts.createPlayer({
-          type: 'mpegts',
-          isLive: true,
-          url: streamURL
-      });
-      player.attachMediaElement(videoElement);
-      player.load()
-      player.play()
+    var player = mpegts.createPlayer({
+      type: 'mpegts',
+      isLive: true,
+      url: streamURL,
+    })
+    player.attachMediaElement(videoElement)
+    player.load()
+    player.play()
   }
 }
 </script>
 <template>
-    <ul v-for="(cam, i) in cameras">
-        <li><video ref="videos" class="video" :data-url="`/media/${cam.id}/live.ts`"></video></li>
-    </ul>
-
+  <ul v-for="(cam, i) in cameras">
+    <li>
+      <video
+        ref="videos"
+        class="video"
+        :data-url="`/media/${cam.id}/live.ts`"
+      ></video>
+    </li>
+  </ul>
 </template>
 
 <style scoped>
 ul {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
-li, .video {
-    background-color: #333;
-    width: 800px;
-    height: 450px;
-    border-radius: 5px;
-    color: #fff;
+li,
+.video {
+  background-color: #333;
+  width: 800px;
+  height: 450px;
+  border-radius: 5px;
+  color: #fff;
 }
 </style>

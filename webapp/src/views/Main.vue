@@ -1,5 +1,4 @@
 <script setup>
-
 import { ref } from 'vue'
 
 const profileMenu = ref()
@@ -48,23 +47,23 @@ function signout() {
 }
 .header {
   width: 100vw;
-  height: 40px;
+  height: 32px;
   background-color: #f6f8fa;
 }
 .header .logo {
   width: 120px;
-  height: 40px;
+  height: 32px;
+  line-height: 32px;
   background-color: #083f39;
   color: #fff;
   font-size: 26px;
-  line-height: 40px;
   text-align: center;
 }
 .header .user {
   float: right;
   height: 40px;
   line-height: 40px;
-  margin: -40px 10px 0 0;
+  margin: -36px 10px 0 0;
   width: 100px;
   z-index: 10000;
   position: relative;
@@ -76,7 +75,7 @@ function signout() {
   z-index: 10000;
 }
 .header .user .menu li a {
-  color: #2E90A0;
+  color: #2e90a0;
 }
 .header .user .menu li a:hover {
   color: #000;
@@ -104,5 +103,11 @@ function signout() {
 .main .content {
   flex: 1;
   padding: 20px;
+}
+
+@media screen and (max-width: 1024px) {
+  nav {
+    display: none;
+  }
 }
 </style>

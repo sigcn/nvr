@@ -6,8 +6,18 @@ const errtips = ref('')
 const btnText = ref('Sign in')
 const idText = ref('')
 const passwordText = ref('')
+const idInput = ref()
+const passwordInput = ref()
 
 async function signIn() {
+  if (!idText.value) {
+    idInput.value.focus()
+    return
+  }
+  if (!passwordText.value) {
+    passwordInput.value.focus()
+    return
+  }
   errtips.value = ''
   btnText.value = 'Signning in'
   let r = await http.post('/v1/api/keys', {
@@ -32,15 +42,27 @@ async function signIn() {
     </div>
     <div class="right-side">
       <div>
-        <h2>Sign in</h2>
+        <h2>Sign in to console</h2>
         <div class="login-form">
           <div>
             <label>Username</label>
-            <input type="text" id="username" v-model="idText" />
+            <input
+              ref="idInput"
+              @keydown.enter="signIn"
+              type="text"
+              id="username"
+              v-model="idText"
+            />
           </div>
           <div>
             <label>Password</label>
-            <input type="password" id="password" v-model="passwordText" />
+            <input
+              ref="passwordInput"
+              @keydown.enter="signIn"
+              type="password"
+              id="password"
+              v-model="passwordText"
+            />
           </div>
           <div class="errtips" v-if="errtips">{{ errtips }}</div>
           <button type="button" @click="signIn">{{ btnText }}</button>
@@ -61,33 +83,33 @@ async function signIn() {
   width: 70%;
   background-color: #fff;
   display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
-  position: relative; /* 使 line 定位在右边 */
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
 .left-side .logo {
-  width: 600px;
-  height: 260px;
+  width: 520px;
+  height: 200px;
   background-color: #097165;
   color: #fff;
   font-size: 100px;
-  line-height: 260px;
+  line-height: 200px;
   text-align: center;
-  border-radius: 4px;
+  border-radius: 2px;
+  box-shadow: 0 0 5px #ccc;
 }
 
 .left-side .line {
   height: 100vh;
   width: 2px;
-  position: absolute; /* 使用绝对定位 */
-  right: 0; /* 贴右边 */
-  top: 50%; /* 从顶部开始 50% */
-  transform: translateY(-50%); /* 上下居中 */
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   background-color: #f0f0f0;
 }
 
-/* 右侧部分，宽度为 40%，放置登录表单 */
 .right-side {
   width: 30%;
   display: flex;
@@ -99,7 +121,7 @@ async function signIn() {
 .login-form {
   background: #f6f8fa;
   padding: 20px;
-  width: 340px;
+  width: 300px;
   border-radius: 5px;
   border: 1px solid #ccc;
   margin-bottom: 30px;
@@ -120,12 +142,13 @@ async function signIn() {
   border: 1px solid #ccc;
   border-radius: 6px;
   color: #59636e;
-  background: #f6f8fa;
+  background: #fff;
 }
 
 .login-form button {
   width: 100%;
-  padding: 10px;
+  padding: 0px;
+  height: 32px;
   margin-top: 10px;
   background-color: #044941;
   color: white;
@@ -137,5 +160,14 @@ async function signIn() {
 
 .login-form button:hover {
   background-color: #0f6157;
+}
+
+@media screen and (max-width: 1024px) {
+  .left-side {
+    display: none;
+  }
+  .right-side {
+    width: 100%;
+  }
 }
 </style>

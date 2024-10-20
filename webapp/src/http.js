@@ -1,4 +1,4 @@
-const apiServer = 'http://192.168.3.47:2998'
+const apiServer = ''
 
 async function post(url, opts) {
   opts.method = 'POST'

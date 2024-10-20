@@ -8,12 +8,13 @@
 }
 
 ul {
-  padding: 0 0 0 20px;
+  padding: 0 0 0 10px;
   margin: 0;
+  list-style: none;
 }
 a {
   text-decoration: none;
-  color: #2E90A0;
+  color: #2e90a0;
   transition: 0.4s;
   padding: 3px;
 }
