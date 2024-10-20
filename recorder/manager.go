@@ -36,6 +36,15 @@ func (m *Manager) Live(id string) (Recorder, error) {
 	return r, nil
 }
 
+func (m *Manager) FS(id string) (Recorder, error) {
+	m.init()
+	r, ok := m.fsRecorders[id]
+	if !ok {
+		return nil, errors.New("not found")
+	}
+	return r, nil
+}
+
 func (m *Manager) Add(id string, streamURL, storePath string) error {
 	if _, ok := m.liveRecorders[id]; ok {
 		return nil

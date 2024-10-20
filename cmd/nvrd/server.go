@@ -8,11 +8,14 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/sigcn/nvr/account"
 	"github.com/sigcn/nvr/camera"
+	"github.com/sigcn/nvr/errdefs"
 	"github.com/sigcn/nvr/recorder"
 )
 
@@ -79,9 +82,27 @@ func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
 		ErrBadRequest.MarshalTo(w)
 		return
 	}
+	pos := r.URL.Query().Get("pos")
+	if pos != "" {
+		fsRecorder, err := s.recorderManager.FS(cameraID)
+		if err != nil {
+			errdefs.ErrCameraNotFound.MarshalTo(w)
+			return
+		}
+		posSecs, err := strconv.ParseInt(pos, 10, 64)
+		if err != nil {
+			ErrBadRequest.Wrap(err).MarshalTo(w)
+			return
+		}
+		if err := fsRecorder.(*recorder.FSRecorder).Read(time.Unix(posSecs, 0), w); err != nil {
+			Err(err).MarshalTo(w)
+			return
+		}
+		return
+	}
 	liveRecorder, err := s.recorderManager.Live(cameraID)
 	if err != nil {
-		ErrCameraNotFound.MarshalTo(w)
+		errdefs.ErrCameraNotFound.MarshalTo(w)
 		return
 	}
 	<-liveRecorder.(*recorder.LiveRecorder).AddWriter(generateID(), w)
@@ -95,7 +116,7 @@ func (s *server) handleCreateCamera(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Type != "onvif" {
-		ErrUnsupportedCameraType.MarshalTo(w)
+		errdefs.ErrUnsupportedCameraType.MarshalTo(w)
 		return
 	}
 
@@ -172,7 +193,7 @@ func (s *server) handleReloadCameras(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) middlewareApiKey(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.HasPrefix(r.URL.Path, "/v1/api/") || !strings.HasPrefix(r.URL.Path, "/media/") {
+		if !strings.HasPrefix(r.URL.Path, "/v1/api/") && !strings.HasPrefix(r.URL.Path, "/media/") {
 			next.ServeHTTP(w, r)
 			return
 		}

@@ -2,12 +2,17 @@ package recorder
 
 import (
 	"errors"
+	"fmt"
+	"io"
+	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/sigcn/nvr/errdefs"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -40,7 +45,7 @@ retry:
 			ffmpeg.KwArgs{"c:a": "aac"},
 			ffmpeg.KwArgs{"strftime": "1"},
 			ffmpeg.KwArgs{"f": "segment"},
-			ffmpeg.KwArgs{"segment_time": "7200"},
+			ffmpeg.KwArgs{"segment_time": "10000"},
 			ffmpeg.KwArgs{"reset_timestamps": "1"})
 
 	cmd := s.Compile()
@@ -64,4 +69,77 @@ func (r *FSRecorder) Interrupt() error {
 		return p.Kill()
 	}
 	return errors.New("not started yet")
+}
+
+func (r *FSRecorder) Read(t time.Time, w io.Writer) error {
+	dir := path.Join(r.Path, t.Format("2006-01"))
+	videoFile, err := r.findFirstVideoTimestamp(dir, t)
+	if err != nil {
+		return err
+	}
+	offset := max(t.Sub(*videoFile).Seconds(), 0)
+	for {
+		err = ffmpeg.Input(path.Join(dir, videoFile.Format("02_15-04-05.ts")),
+			ffmpeg.KwArgs{"ss": offset}).WithOutput(w).Output("-",
+			ffmpeg.KwArgs{"c": "copy"},
+			ffmpeg.KwArgs{"f": "mpegts"}).Run()
+		if err != nil {
+			return err
+		}
+
+		videoFile, err = r.findNextVideoTimestamp(dir, *videoFile)
+		if err != nil {
+			return err
+		}
+		if videoFile == nil {
+			break
+		}
+		offset = 0
+	}
+	return nil
+}
+
+func (r *FSRecorder) findNextVideoTimestamp(dir string, videoFile time.Time) (*time.Time, error) {
+	videos, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	for i, v := range videos {
+		if videoFile.Format("02_15-04-05.ts") == v.Name() {
+			if i == len(videos)-1 {
+				break
+			}
+			nextVideo, err := time.ParseInLocation("2006-01-02_15-04-05.ts", fmt.Sprintf("%s-%s", filepath.Base(dir), videos[i+1].Name()), time.Local)
+			if err != nil {
+				return nil, err
+			}
+			return &nextVideo, nil
+		}
+	}
+	return nil, nil
+}
+
+func (r *FSRecorder) findFirstVideoTimestamp(dir string, t time.Time) (*time.Time, error) {
+	videos, err := os.ReadDir(dir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, errdefs.ErrVideoNotFound
+		}
+		return nil, err
+	}
+	for i, v := range videos {
+		timestamp, err := time.ParseInLocation("2006-01-02_15-04-05.ts", fmt.Sprintf("%s-%s", filepath.Base(dir), v.Name()), time.Local)
+		if err != nil {
+			slog.Warn("Skip invalid video file", "dir", dir, "file", v.Name(), "err", err)
+			continue
+		}
+		if timestamp.After(t) {
+			last, err := time.ParseInLocation("2006-01-02_15-04-05.ts", fmt.Sprintf("%s-%s", filepath.Base(dir), videos[max(i-1, 0)].Name()), time.Local)
+			if err != nil {
+				return nil, err
+			}
+			return &last, nil
+		}
+	}
+	return nil, errdefs.ErrVideoNotFound
 }
