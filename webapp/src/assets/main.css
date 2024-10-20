@@ -1,0 +1,40 @@
+@import './base.css';
+
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  font-weight: normal;
+}
+
+ul {
+  padding: 0 0 0 20px;
+  margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #2E90A0;
+  transition: 0.4s;
+  padding: 3px;
+}
+
+.router-link-active {
+  color: #000;
+}
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
