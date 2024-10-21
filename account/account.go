@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 
@@ -118,13 +119,18 @@ func (s *SimpleApiKeyStore) Save() error {
 }
 
 func (s *SimpleApiKeyStore) changed() bool {
-	sha256Hash := sha256.New()
-
 	s.tokensMux.RLock()
+	keys := make([]string, len(s.tokens))
 	for k := range s.tokens {
-		sha256Hash.Write([]byte(k))
+		keys = append(keys, k)
 	}
 	s.tokensMux.RUnlock()
+	sort.Strings(keys)
+
+	sha256Hash := sha256.New()
+	for _, k := range keys {
+		sha256Hash.Write([]byte(k))
+	}
 
 	hash := sha256Hash.Sum(nil)
 	if bytes.Equal(hash, s.lastTokensHash) {
