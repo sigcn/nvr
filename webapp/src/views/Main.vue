@@ -1,4 +1,5 @@
 <script setup>
+import http from '@/http';
 import { ref } from 'vue'
 
 const profileMenu = ref()
@@ -7,8 +8,11 @@ function slideMenu() {
   profileMenu.value = !profileMenu.value
 }
 
-function signout() {
+async function signout() {
+  let sessionVal = window.localStorage.getItem('session')
+  let session = JSON.parse(sessionVal)
   window.localStorage.removeItem('session')
+  await http.delete('/v1/api/keys', {session: session})
   window.location.href = '/'
 }
 </script>
