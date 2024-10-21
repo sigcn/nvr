@@ -52,6 +52,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET    /media/{camera_id}/live.ts", httpserver.handleMediaMPEGTS)
 	mux.HandleFunc("POST   /v1/api/keys", httpserver.handleCreateApiKey)
+	mux.HandleFunc("DELETE /v1/api/keys", httpserver.handleDeleteApiKey)
 	mux.HandleFunc("POST   /v1/api/cameras", httpserver.handleCreateCamera)
 	mux.HandleFunc("GET    /v1/api/cameras", httpserver.handleListCameras)
 	mux.HandleFunc("DELETE /v1/api/cameras/{camera_id}", httpserver.handleDeleteCamera)

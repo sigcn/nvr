@@ -76,6 +76,15 @@ func (s *server) handleCreateApiKey(w http.ResponseWriter, r *http.Request) {
 	Ok(CreateApiKeyResponse{Key: apiKey, User: user}).MarshalTo(w)
 }
 
+func (s *server) handleDeleteApiKey(w http.ResponseWriter, r *http.Request) {
+	apiKey := r.Header.Get("X-ApiKey")
+	if err := s.apiKeyStore.Remove(apiKey); err != nil {
+		Err(err).MarshalTo(w)
+		return
+	}
+	Ok(nil).MarshalTo(w)
+}
+
 func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
 	cameraID := r.PathValue("camera_id")
 	if cameraID == "" {
