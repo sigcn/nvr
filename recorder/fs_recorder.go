@@ -141,5 +141,6 @@ func (r *FSRecorder) findFirstVideoTimestamp(dir string, t time.Time) (*time.Tim
 			return &last, nil
 		}
 	}
-	return nil, errdefs.ErrVideoNotFound
+	latest, err := time.ParseInLocation("2006-01-02_15-04-05.ts", fmt.Sprintf("%s-%s", filepath.Base(dir), videos[len(videos)-1].Name()), time.Local)
+	return &latest, err
 }
