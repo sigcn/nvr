@@ -6,11 +6,30 @@ import { onBeforeRouteLeave } from 'vue-router'
 
 const cameras = ref([])
 const videos = ref([])
+const addr =ref()
+const username =ref()
+const password = ref()
+const formOpened = ref()
+const addrRef =ref()
+const usernameRef = ref()
+const passwordRef = ref()
 
 onMounted(async () => {
   let sessionVal = window.localStorage.getItem('session')
   let session = JSON.parse(sessionVal)
   await loadCameras(session)
+  loadVideos(session)
+})
+
+onBeforeRouteLeave(destroyVideos)
+
+async function destroyVideos() {
+  videos.value.forEach((v, i) => {
+    v.player.destroy()
+  })
+}
+
+async function loadVideos(session) {
   videos.value.forEach(async (v, i) => {
     if (mpegts.getFeatureList().mseLivePlayback) {
       var player = mpegts.createPlayer({
@@ -42,13 +61,7 @@ onMounted(async () => {
       }
     }
   })
-})
-
-onBeforeRouteLeave(() => {
-  videos.value.forEach((v, i) => {
-    v.player.destroy()
-  })
-})
+}
 
 async function loadCameras(session) {
   let r = await http.get('/v1/api/cameras', { session: session })
@@ -79,10 +92,61 @@ function stop(i) {
   player.detachMediaElement()
   cameras.value[i].playing = false
 }
+
+async function saveForm() {
+  if (!addr.value) {
+    addrRef.value.focus()
+    return
+  }
+  if (!username.value) {
+    usernameRef.value.focus()
+    return
+  }
+  if (!password.value) {
+    passwordRef.value.focus()
+    return
+  }
+  let sessionVal = window.localStorage.getItem("session")
+  let session = JSON.parse(sessionVal)
+  let r = await http.post('/v1/api/cameras', {body: {
+    type: "onvif",
+    addr: addr.value,
+    username: username.value,
+    password: password.value}, session})
+  if(r.code!=0){
+    alert(r.msg)
+    return
+  }
+  formOpened.value=false
+  await destroyVideos()
+  await loadCameras(session)
+  loadVideos(session)
+}
+
+function openForm() {
+  formOpened.value = !formOpened.value
+}
 </script>
 <template>
-  <ul v-for="(cam, i) in cameras">
-    <li>
+  <div class="operations">
+    <div class="add" v-if="!formOpened"><a href="javascript:;" @click="openForm">+Add</a></div>
+    <div class="form" v-if="formOpened">
+      <label>Type</label>
+      <select>
+        <option>onvif</option>
+      </select>
+      <label>Addr</label>
+      <input ref="addrRef" type="text" v-model="addr" @keydown.enter="saveForm" />
+      <label>Username</label>
+      <input ref="usernameRef" type="text" v-model="username" @keydown.enter="saveForm" />
+      <label>Password</label>
+      <input ref="passwordRef" type="password" v-model="password" @keydown.enter="saveForm" />
+      <a class="btn-save" href="javascript:;" @click="saveForm">Save</a>
+      <a class="btn-cancel" href="javascript:;" @click="openForm">Cancel</a>
+    </div>
+  </div>
+  <ul>
+    <li v-for="(cam, i) in cameras">
       <div class="bg" v-if="!cam.playing">
       no video signal
       </div>
@@ -112,23 +176,51 @@ function stop(i) {
         <div class="b model" v-if="cam.meta.manufacturer">{{ cam.meta.manufacturer }}</div>
         <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
         </div>
-        <div class="enter">Enter</div>
+        <div class="enter"><a href="">Enter</a></div>
       </div>
     </li>
   </ul>
 </template>
 
 <style scoped>
+.operations {
+  height: 46px;
+  line-height: 46px;
+  display: flex;
+}
+.operations .add {
+  color: #023630;
+}
+
+.operations .form label {
+  font-size: 14px;
+  margin:0 5px;
+}
+.operations .form select, .operations .form option,.operations .form input {
+  border: 1px solid var(--control-borderColor-rest, var(--color-border-default));
+  line-height: 22px;
+  border-radius: 3px;
+  padding: 0;
+  margin: 0;
+}
+
+.operations .form .btn-save, .operations .form .btn-cancel {
+  margin: 0 0 0 10px;
+}
+
 ul {
+  display: flex;
+  flex-wrap: wrap;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 li {
   display: flex;
-  width: 600px;
+  width: 560px;
   flex-direction: column;
   position: relative;
+  margin: 0 10px 10px 0;
 }
 li,.bg,
 .video {
@@ -136,7 +228,7 @@ li,.bg,
 }
 .video, .bg {
   aspect-ratio: 16/9;
-  width: 600px;
+  width: 560px;
   border-radius: 5px 5px 0 0;
   background-color: #333;
 }
