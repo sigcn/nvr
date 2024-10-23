@@ -51,27 +51,29 @@ async function signout() {
 }
 .header {
   width: 100vw;
-  height: 32px;
+  height: 36px;
   background-color: #f6f8fa;
+  border-bottom: var(--borderWidth-thin) solid #d1d9e0;
 }
 .header .logo {
-  width: 120px;
-  height: 32px;
-  line-height: 32px;
+  width: 136px;
+  height: 36px;
+  line-height: 36px;
   background-color: #083f39;
   color: #fff;
-  font-size: 26px;
+  font-size: 30px;
   text-align: center;
 }
 .header .user {
   float: right;
   height: 40px;
   line-height: 40px;
-  margin: -36px 10px 0 0;
+  margin: -40px 10px 0 0;
   width: 100px;
   z-index: 10000;
   position: relative;
   cursor: pointer;
+  user-select: none;
 }
 .header .user .menu {
   width: 100px;
@@ -91,7 +93,7 @@ async function signout() {
 }
 .main nav {
   height: 100%;
-  width: 120px;
+  width: 136px;
 }
 .main nav ul {
   height: 100%;
@@ -106,7 +108,8 @@ async function signout() {
 }
 .main .content {
   flex: 1;
-  padding: 20px;
+  max-height: calc(100vh - 36px);
+  overflow-y: scroll;
 }
 
 @media screen and (max-width: 1024px) {

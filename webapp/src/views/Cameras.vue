@@ -3,14 +3,36 @@ import { onMounted, ref } from 'vue'
 import http from '../http'
 import mpegts from 'mpegts.js'
 import { onBeforeRouteLeave } from 'vue-router'
+import IconAdd from '@/components/IconAdd.vue'
 
 const cameras = ref([])
 const videos = ref([])
+const addr = ref()
+const username = ref()
+const password = ref()
+const formOpened = ref()
+const addrRef = ref()
+const usernameRef = ref()
+const passwordRef = ref()
+const saveBtnText = ref('Save')
+const errTips = ref('')
 
 onMounted(async () => {
   let sessionVal = window.localStorage.getItem('session')
   let session = JSON.parse(sessionVal)
   await loadCameras(session)
+  loadVideos(session)
+})
+
+onBeforeRouteLeave(destroyVideos)
+
+async function destroyVideos() {
+  videos.value.forEach((v, i) => {
+    v.player.destroy()
+  })
+}
+
+async function loadVideos(session) {
   videos.value.forEach(async (v, i) => {
     if (mpegts.getFeatureList().mseLivePlayback) {
       var player = mpegts.createPlayer({
@@ -19,12 +41,12 @@ onMounted(async () => {
         url: `${http.apiServer}${v.dataset.url}?api_key=${session.key}`,
       })
       player.attachMediaElement(v)
-      player.on(mpegts.Events.MEDIA_INFO, function(mediaInfo) {
-          console.log('Media Info:', mediaInfo)
-          cameras.value[i].videoCodec = mediaInfo.videoCodec
-          cameras.value[i].audioCodec = mediaInfo.audioCodec
-          cameras.value[i].fps = mediaInfo.fps
-      });
+      player.on(mpegts.Events.MEDIA_INFO, function (mediaInfo) {
+        console.log('Media Info:', mediaInfo)
+        cameras.value[i].videoCodec = mediaInfo.videoCodec
+        cameras.value[i].audioCodec = mediaInfo.audioCodec
+        cameras.value[i].fps = mediaInfo.fps
+      })
       v.player = player
       cameras.value[i].loading = true
       player.load()
@@ -42,13 +64,7 @@ onMounted(async () => {
       }
     }
   })
-})
-
-onBeforeRouteLeave(() => {
-  videos.value.forEach((v, i) => {
-    v.player.destroy()
-  })
-})
+}
 
 async function loadCameras(session) {
   let r = await http.get('/v1/api/cameras', { session: session })
@@ -79,21 +95,66 @@ function stop(i) {
   player.detachMediaElement()
   cameras.value[i].playing = false
 }
+
+async function saveForm() {
+  if (!addr.value) {
+    addrRef.value.focus()
+    return
+  }
+  if (!username.value) {
+    usernameRef.value.focus()
+    return
+  }
+  if (!password.value) {
+    passwordRef.value.focus()
+    return
+  }
+  saveBtnText.value = 'Committing'
+  let sessionVal = window.localStorage.getItem('session')
+  let session = JSON.parse(sessionVal)
+  let r = await http.post('/v1/api/cameras', {
+    body: {
+      type: 'onvif',
+      addr: addr.value,
+      username: username.value,
+      password: password.value,
+    },
+    session,
+  })
+  saveBtnText.value = 'Save'
+  if (r.code != 0) {
+    errTips.value = r.msg
+    return
+  }
+  formOpened.value = false
+  await destroyVideos()
+  await loadCameras(session)
+  loadVideos(session)
+}
+
+function openForm() {
+  errTips.value = ''
+  formOpened.value = !formOpened.value
+}
 </script>
 <template>
-  <ul v-for="(cam, i) in cameras">
-    <li>
-      <div class="bg" v-if="!cam.playing">
-      no video signal
-      </div>
+  <ul>
+    <li v-for="(cam, i) in cameras">
+      <div class="bg" v-if="!cam.playing">no video signal</div>
       <video
         ref="videos"
         class="video"
-        @mouseenter="cam.showmenu=true"
+        @mouseenter="cam.showmenu = true"
+        @mouseleave="cam.showmenu = false"
         :data-url="`/media/${cam.id}/live.ts`"
-        :style="`display: ${cam.playing?'block':'none'}`"
+        :style="`display: ${cam.playing ? 'block' : 'none'}`"
       ></video>
-      <div class="menu" v-if="!cam.playing || cam.showmenu" @mouseleave="cam.showmenu=false">
+      <div
+        class="menu"
+        v-if="!cam.playing || cam.showmenu"
+        @mouseenter="cam.showmenu = true"
+        @mouseleave="cam.showmenu = false"
+      >
         <div class="play" @click="play(i)">
           {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
         </div>
@@ -108,11 +169,54 @@ function stop(i) {
       </div>
       <div class="desc">
         <div class="text">
-          <div class="b remark">{{ cam.remark ? `${cam.remark}` : cam.meta.manufacturer }}</div>
-        <div class="b model" v-if="cam.meta.manufacturer">{{ cam.meta.manufacturer }}</div>
-        <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
+          <div class="b remark">
+            {{ cam.remark ? `${cam.remark}` : cam.meta.manufacturer }}
+          </div>
+          <div class="b model" v-if="cam.meta.manufacturer">
+            {{ cam.meta.manufacturer }}
+          </div>
+          <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
         </div>
-        <div class="enter">Enter</div>
+        <div class="enter"><a href="">Enter</a></div>
+      </div>
+    </li>
+    <li>
+      <div class="addArea" v-if="!formOpened" @click="openForm">
+        <IconAdd class="add" />
+      </div>
+      <div class="addForm" v-if="formOpened">
+        <div class="form">
+          <label>Type</label>
+          <select>
+            <option>onvif</option>
+          </select><br />
+          <label>Addr</label>
+          <input
+            ref="addrRef"
+            type="text"
+            v-model="addr"
+            @keydown.enter="saveForm"
+          />
+          <label>Username</label>
+          <input
+            ref="usernameRef"
+            type="text"
+            v-model="username"
+            @keydown.enter="saveForm"
+          />
+          <label>Password</label>
+          <input
+            ref="passwordRef"
+            type="password"
+            v-model="password"
+            @keydown.enter="saveForm"
+          />
+          <div class="errTips">{{ errTips }}</div>
+          <div class="btns">
+            <a class="btn-save mainbtn" href="javascript:;" @click="saveForm">{{ saveBtnText }}</a>
+          <a class="btn-cancel mainbtn" href="javascript:;" @click="openForm">Cancel</a>
+          </div>  
+        </div>
       </div>
     </li>
   </ul>
@@ -120,23 +224,28 @@ function stop(i) {
 
 <style scoped>
 ul {
-  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 15px;
   margin: 0;
   list-style: none;
 }
 li {
   display: flex;
-  width: 600px;
+  width: 560px;
   flex-direction: column;
   position: relative;
+  margin: 0 15px 10px 0;
 }
-li,.bg,
+li,
+.bg,
 .video {
   color: #fff;
 }
-.video, .bg {
+.video,
+.bg {
   aspect-ratio: 16/9;
-  width: 600px;
+  width: 560px;
   border-radius: 5px 5px 0 0;
   background-color: #333;
 }
@@ -166,7 +275,9 @@ li .desc .b {
   margin-right: 10px;
 }
 
-li .desc .remark {font-weight: bold;}
+li .desc .remark {
+  font-weight: bold;
+}
 
 li .desc .model {
   font-size: 12px;
@@ -224,4 +335,73 @@ li .menu .play {
 li .menu .play:hover {
   background-color: #0f6157;
 }
+
+.addArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  cursor: pointer;
+}
+.addArea:hover {
+  background-color: var(--header-bg);
+}
+
+.addArea .add {
+  width: 120px;
+  height: 120px;
+}
+
+.addForm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.addForm .form {
+  background: #f6f8fa;
+  padding: 20px;
+  border-radius: 5px;
+  height: 100%;
+}
+
+.addForm .form label {
+  color: #333;
+  margin-right: 10px;
+  font-size: 16px;
+}
+.addForm .form input {
+  width: 100%;
+  line-height: 32px;
+  padding: 0 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  color: #59636e;
+  background: #fff;
+}
+
+.addForm .form .btns {
+  margin-top: 10px;
+}
+
+.btn-save, .btn-cancel {
+  width: 100px;
+  margin-right: 10px;
+  line-height: 32px;
+  height: 32px;
+}
+
+.errTips {
+  max-height: 26px;
+  overflow-y: scroll;
+  line-height: 26px;
+  color: red;
+}
+
+.btn-cancel {
+  opacity: 0.8;
+}
+
 </style>

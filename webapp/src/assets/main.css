@@ -18,10 +18,31 @@ a {
   transition: 0.4s;
   padding: 3px;
 }
+a:hover {
+  text-decoration: underline;
+}
 
 .router-link-active {
   color: #000;
 }
+
+.mainbtn {
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  line-height: 30px;
+  background-color: #044941;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid #023630;
+  text-align: center;
+}
+
+.mainbtn:hover {
+  background-color: #0f6157;
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);

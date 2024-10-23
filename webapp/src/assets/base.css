@@ -34,6 +34,9 @@
   --color-text: var(--vt-c-text-light-1);
 
   --section-gap: 160px;
+  --borderWidth-thin: max(1px, 0.0625rem);
+  --control-borderColor-rest: #d1d9e0;
+  --header-bg: #f6f8fa;
 }
 
 @media (prefers-color-scheme: dark) {
