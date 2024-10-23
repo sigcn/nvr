@@ -84,6 +84,9 @@ func (cam *ONVIFCamera) init() error {
 	if err != nil {
 		return fmt.Errorf("onvif: get profiles: %w", err)
 	}
+	if r1.Profiles == nil {
+		return errors.New("invalid username/password")
+	}
 	cam.profiles = r1.Profiles
 	return nil
 }
