@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"flag"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -27,6 +30,7 @@ func main() {
 	flag.StringVar(&storePath, "store", "/var/lib/nvrd", "store path")
 	flag.StringVar(&listen, "listen", ":2998", "listen addr")
 	flag.IntVar(&logLevel, "loglevel", 0, "logging level")
+	flag.BoolFunc("v", "print version", printVersion)
 	flag.Parse()
 
 	sdk.Logger = sdk.Logger.Level(zerolog.InfoLevel)
@@ -73,4 +77,23 @@ func handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 	}
 	f.Close()
 	http.ServeFileFS(w, r, static.FS, strings.TrimPrefix(r.URL.Path, "/"))
+}
+
+func printVersion(s string) error {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return errors.ErrUnsupported
+	}
+	fmt.Println(info.GoVersion)
+	for _, s := range info.Settings {
+		if s.Key == "vcs.revision" {
+			fmt.Println("commit\t", s.Value)
+			continue
+		}
+		if s.Key == "vcs.time" {
+			fmt.Println("time\t", s.Value)
+		}
+	}
+	os.Exit(0)
+	return nil
 }
