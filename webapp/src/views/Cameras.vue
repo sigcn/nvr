@@ -165,12 +165,12 @@ function volumeMuted(i) {
       >
         <div class="ops">
           <div class="play" @click="play(i)">
-          {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
-        </div>
-        <div class="muted" @click="volumeMuted(i)">
-          <IconMuted v-if="cam.muted" />
-        <IconUnmuted v-else />
-        </div>
+            {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
+          </div>
+          <div class="muted" @click="volumeMuted(i)">
+            <IconMuted v-if="cam.muted" />
+            <IconUnmuted v-else />
+          </div>
         </div>
         <div class="media">
           <label>videoCodec</label>
@@ -191,7 +191,9 @@ function volumeMuted(i) {
           </div>
           <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
         </div>
-        <div class="enter"><RouterLink :to="`/cameras/${cam.id}`" >Enter</RouterLink></div>
+        <div class="enter">
+          <RouterLink :to="`/cameras/${cam.id}`">Enter</RouterLink>
+        </div>
       </div>
     </li>
     <li>
@@ -202,8 +204,8 @@ function volumeMuted(i) {
         <div class="form">
           <label>Type</label>
           <select>
-            <option>onvif</option>
-          </select><br />
+            <option>onvif</option></select
+          ><br />
           <label>Addr</label>
           <input
             ref="addrRef"
@@ -227,9 +229,13 @@ function volumeMuted(i) {
           />
           <div class="errTips">{{ errTips }}</div>
           <div class="btns">
-            <a class="btn-save mainbtn" href="javascript:;" @click="saveForm">{{ saveBtnText }}</a>
-          <a class="btn-cancel mainbtn" href="javascript:;" @click="openForm">Cancel</a>
-          </div>  
+            <a class="btn-save mainbtn" href="javascript:;" @click="saveForm">{{
+              saveBtnText
+            }}</a>
+            <a class="btn-cancel mainbtn" href="javascript:;" @click="openForm"
+              >Cancel</a
+            >
+          </div>
         </div>
       </div>
     </li>
@@ -417,7 +423,8 @@ li .menu .play:hover {
   margin-top: 10px;
 }
 
-.btn-save, .btn-cancel {
+.btn-save,
+.btn-cancel {
   width: 100px;
   margin-right: 10px;
   line-height: 32px;
@@ -435,9 +442,10 @@ li .menu .play:hover {
   opacity: 0.8;
 }
 
-
 @media screen and (max-width: 1024px) {
-  li,li video,li .bg {
+  li,
+  li video,
+  li .bg {
     width: 100%;
   }
   li {
@@ -449,5 +457,4 @@ li .menu .play:hover {
     overflow-x: scroll;
   }
 }
-
 </style>

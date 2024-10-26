@@ -66,7 +66,7 @@ async function signout() {
   float: right;
   height: 40px;
   line-height: 40px;
-  margin: -40px 10px 0 0;
+  margin: -38px 10px 0 0;
   width: 100px;
   z-index: 10000;
   position: relative;
