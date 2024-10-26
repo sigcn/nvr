@@ -26,7 +26,7 @@ var (
 func main() {
 	flag.StringVar(&storePath, "store", "/var/lib/nvrd", "store path")
 	flag.StringVar(&listen, "listen", ":2998", "listen addr")
-	flag.IntVar(&logLevel, "V", 0, "logging level")
+	flag.IntVar(&logLevel, "loglevel", 0, "logging level")
 	flag.Parse()
 
 	sdk.Logger = sdk.Logger.Level(zerolog.InfoLevel)
