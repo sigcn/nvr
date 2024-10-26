@@ -152,7 +152,6 @@ function volumeMuted(i) {
       <div class="bg" v-if="!cam.playing">no video signal</div>
       <video
         ref="videos"
-        class="video"
         @mouseenter="cam.showmenu = true"
         @mouseleave="cam.showmenu = false"
         :data-url="`/media/${cam.id}/live.ts`"
@@ -254,10 +253,10 @@ li {
 }
 li,
 .bg,
-.video {
+video {
   color: #fff;
 }
-.video,
+video,
 .bg {
   aspect-ratio: 16/9;
   width: 560px;
@@ -328,6 +327,7 @@ li .menu {
 }
 li .menu .media {
   color: #ccc;
+  font-size: 10px;
 }
 li .menu .media label {
   margin: 5px;
@@ -433,6 +433,21 @@ li .menu .play:hover {
 
 .btn-cancel {
   opacity: 0.8;
+}
+
+
+@media screen and (max-width: 1024px) {
+  li,li video,li .bg {
+    width: 100%;
+  }
+  li {
+    margin: 0;
+    margin-bottom: 15px;
+  }
+  .media {
+    max-width: 70%;
+    overflow-x: scroll;
+  }
 }
 
 </style>

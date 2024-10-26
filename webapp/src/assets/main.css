@@ -29,14 +29,15 @@ a:hover {
 .mainbtn {
   display: inline-block;
   width: 60px;
-  height: 30px;
-  line-height: 30px;
+  height: 32px;
+  line-height: 32px;
   background-color: #044941;
   color: white;
   cursor: pointer;
   border-radius: 6px;
   border: 1px solid #023630;
   text-align: center;
+  padding: 0;
 }
 
 .mainbtn:hover {

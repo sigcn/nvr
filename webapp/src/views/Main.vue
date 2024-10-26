@@ -31,7 +31,6 @@ async function signout() {
       <nav>
         <ul>
           <li><RouterLink to="/cameras">Cameras</RouterLink></li>
-          <li><RouterLink to="/settings">Settings</RouterLink></li>
         </ul>
       </nav>
       <div class="content"><RouterView /></div>
