@@ -4,6 +4,8 @@ import http from '../http'
 import mpegts from 'mpegts.js'
 import { onBeforeRouteLeave } from 'vue-router'
 import IconAdd from '@/components/IconAdd.vue'
+import IconMuted from '@/components/IconMuted.vue'
+import IconUnmuted from '@/components/IconUnmuted.vue'
 
 const cameras = ref([])
 const videos = ref([])
@@ -47,6 +49,8 @@ async function loadVideos(session) {
         cameras.value[i].audioCodec = mediaInfo.audioCodec
         cameras.value[i].fps = mediaInfo.fps
       })
+      v.muted = true
+      cameras.value[i].muted = true
       v.player = player
       cameras.value[i].loading = true
       player.load()
@@ -136,6 +140,11 @@ function openForm() {
   errTips.value = ''
   formOpened.value = !formOpened.value
 }
+
+function volumeMuted(i) {
+  cameras.value[i].muted = !cameras.value[i].muted
+  videos.value[i].muted = cameras.value[i].muted
+}
 </script>
 <template>
   <ul>
@@ -155,8 +164,14 @@ function openForm() {
         @mouseenter="cam.showmenu = true"
         @mouseleave="cam.showmenu = false"
       >
-        <div class="play" @click="play(i)">
+        <div class="ops">
+          <div class="play" @click="play(i)">
           {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
+        </div>
+        <div class="muted" @click="volumeMuted(i)">
+          <IconMuted v-if="cam.muted" />
+        <IconUnmuted v-else />
+        </div>
         </div>
         <div class="media">
           <label>videoCodec</label>
@@ -177,7 +192,7 @@ function openForm() {
           </div>
           <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
         </div>
-        <div class="enter"><a href="">Enter</a></div>
+        <div class="enter"><RouterLink :to="`/cameras/${cam.id}`" >Enter</RouterLink></div>
       </div>
     </li>
     <li>
@@ -302,12 +317,14 @@ li .menu {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 50px;
+  height: 40px;
   padding: 10px;
   position: absolute;
   bottom: 50px;
   z-index: 100;
   width: 100%;
+  background-color: #023630;
+  opacity: 0.8;
 }
 li .menu .media {
   color: #ccc;
@@ -318,8 +335,22 @@ li .menu .media label {
 li .menu .media span {
   font-weight: bold;
 }
+
+li .menu .muted {
+  display: inline-block;
+  line-height: 30px;
+  margin: -2px 0 0 10px;
+  cursor: pointer;
+}
+li .menu .muted svg {
+  width: 22px;
+  height: 22px;
+
+  display: inline-block;
+  vertical-align: middle;
+}
 li .menu .play {
-  display: block;
+  display: inline-block;
   width: 60px;
   height: 30px;
   line-height: 30px;
