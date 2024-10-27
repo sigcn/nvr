@@ -62,6 +62,7 @@ func main() {
 	mux.HandleFunc("DELETE /v1/api/cameras/{camera_id}", httpserver.handleDeleteCamera)
 	mux.HandleFunc("PATCH  /v1/api/cameras/{camera_id}/remark", httpserver.handleUpdateCameraRemark)
 	mux.HandleFunc("POST   /v1/api/cameras/reload", httpserver.handleReloadCameras)
+	mux.HandleFunc("GET    /v1/api/stat", handleStat)
 	mux.HandleFunc("GET    /", handleStaticFiles)
 
 	if err := http.ListenAndServe(listen, corsMiddleware(httpserver.middlewareApiKey(mux))); err != nil {
