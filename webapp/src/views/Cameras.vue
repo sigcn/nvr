@@ -1,8 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import http from '../http'
 import mpegts from 'mpegts.js'
-import { onBeforeRouteLeave } from 'vue-router'
+import {onBeforeRouteLeave} from 'vue-router'
 import IconAdd from '@/components/IconAdd.vue'
 import IconMuted from '@/components/IconMuted.vue'
 import IconUnmuted from '@/components/IconUnmuted.vue'
@@ -19,28 +19,30 @@ const passwordRef = ref()
 const saveBtnText = ref('Save')
 const errTips = ref('')
 
+
 onMounted(async () => {
-  let sessionVal = window.localStorage.getItem('session')
-  let session = JSON.parse(sessionVal)
-  await loadCameras(session)
-  loadVideos(session)
+  await reloadAllCameras()
 })
+
+watch(cameras, n => {
+  console.log('cameras: ', n)
+}, {immediate: true})
 
 onBeforeRouteLeave(destroyVideos)
 
 async function destroyVideos() {
   videos.value.forEach((v, i) => {
-    v.player.destroy()
+    v.player?.destroy()
   })
 }
 
-async function loadVideos(session) {
+async function loadVideos() {
   videos.value.forEach(async (v, i) => {
     if (mpegts.getFeatureList().mseLivePlayback) {
       var player = mpegts.createPlayer({
         type: 'mpegts',
         isLive: true,
-        url: `${http.apiServer}${v.dataset.url}?api_key=${session.key}`,
+        url: `${http.apiServer}${v.dataset.url}?api_key=${http.sessionKey()}`,
       })
       player.attachMediaElement(v)
       player.on(mpegts.Events.MEDIA_INFO, function (mediaInfo) {
@@ -70,8 +72,8 @@ async function loadVideos(session) {
   })
 }
 
-async function loadCameras(session) {
-  let r = await http.get('/v1/api/cameras', { session: session })
+async function loadCameras() {
+  let r = await http.get('/v1/api/cameras')
   console.log(r)
   if (r.code != 0) {
     return
@@ -114,8 +116,6 @@ async function saveForm() {
     return
   }
   saveBtnText.value = 'Committing'
-  let sessionVal = window.localStorage.getItem('session')
-  let session = JSON.parse(sessionVal)
   let r = await http.post('/v1/api/cameras', {
     body: {
       type: 'onvif',
@@ -123,7 +123,6 @@ async function saveForm() {
       username: username.value,
       password: password.value,
     },
-    session,
   })
   saveBtnText.value = 'Save'
   if (r.code != 0) {
@@ -131,9 +130,25 @@ async function saveForm() {
     return
   }
   formOpened.value = false
+  await reloadAllCameras()
+}
+
+const reloadAllCameras = async () => {
   await destroyVideos()
-  await loadCameras(session)
-  loadVideos(session)
+  await loadCameras()
+  await loadVideos()
+}
+
+const deleteCamera = async id => {
+  if (window.confirm(`Confirm to Del. id:${id}`)) {
+    const {success, msg} = await http.delete(`/v1/api/cameras/${id}`)
+    if (!success) {
+      window.alert(`删除失败:${msg}`)
+      return
+    }
+
+    await reloadAllCameras()
+  }
 }
 
 function openForm() {
@@ -168,8 +183,8 @@ function volumeMuted(i) {
             {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
           </div>
           <div class="muted" @click="volumeMuted(i)">
-            <IconMuted v-if="cam.muted" />
-            <IconUnmuted v-else />
+            <IconMuted v-if="cam.muted"/>
+            <IconUnmuted v-else/>
           </div>
         </div>
         <div class="media">
@@ -191,21 +206,25 @@ function volumeMuted(i) {
           </div>
           <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
         </div>
-        <div class="enter">
-          <RouterLink :to="`/cameras/${cam.id}`">Enter</RouterLink>
+        <div class="operation">
+          <div class="delete" @click="deleteCamera(cam.id)">Del</div>
+          <div class="enter">
+            <RouterLink :to="`/cameras/${cam.id}`">Enter</RouterLink>
+          </div>
         </div>
       </div>
     </li>
     <li>
       <div class="addArea" v-if="!formOpened" @click="openForm">
-        <IconAdd class="add" />
+        <IconAdd class="add"/>
       </div>
       <div class="addForm" v-if="formOpened">
         <div class="form">
           <label>Type</label>
           <select>
-            <option>onvif</option></select
-          ><br />
+            <option>onvif</option>
+          </select
+          ><br/>
           <label>Addr</label>
           <input
             ref="addrRef"
@@ -230,10 +249,10 @@ function volumeMuted(i) {
           <div class="errTips">{{ errTips }}</div>
           <div class="btns">
             <a class="btn-save mainbtn" href="javascript:;" @click="saveForm">{{
-              saveBtnText
-            }}</a>
+                saveBtnText
+              }}</a>
             <a class="btn-cancel mainbtn" href="javascript:;" @click="openForm"
-              >Cancel</a
+            >Cancel</a
             >
           </div>
         </div>
@@ -250,6 +269,7 @@ ul {
   margin: 0;
   list-style: none;
 }
+
 li {
   display: flex;
   width: 560px;
@@ -257,11 +277,13 @@ li {
   position: relative;
   margin: 0 15px 10px 0;
 }
+
 li,
 .bg,
 video {
   color: #fff;
 }
+
 video,
 .bg {
   aspect-ratio: 16/9;
@@ -269,6 +291,7 @@ video,
   border-radius: 5px 5px 0 0;
   background-color: #333;
 }
+
 .bg {
   display: flex;
   justify-content: center;
@@ -304,6 +327,17 @@ li .desc .model {
   color: #0f6157;
 }
 
+li .desc .operation {
+  display: flex;
+  align-items: center;
+
+  .delete {
+    color: red;
+    font-weight: bold;
+    margin-right: 5px;
+  }
+}
+
 li .desc .enter {
   width: 52px;
   height: 42px;
@@ -331,13 +365,16 @@ li .menu {
   background-color: #023630;
   opacity: 0.8;
 }
+
 li .menu .media {
   color: #ccc;
   font-size: 10px;
 }
+
 li .menu .media label {
   margin: 5px;
 }
+
 li .menu .media span {
   font-weight: bold;
 }
@@ -348,6 +385,7 @@ li .menu .muted {
   margin: -2px 0 0 10px;
   cursor: pointer;
 }
+
 li .menu .muted svg {
   width: 22px;
   height: 22px;
@@ -355,6 +393,7 @@ li .menu .muted svg {
   display: inline-block;
   vertical-align: middle;
 }
+
 li .menu .play {
   display: inline-block;
   width: 60px;
@@ -380,6 +419,7 @@ li .menu .play:hover {
   height: 100%;
   cursor: pointer;
 }
+
 .addArea:hover {
   background-color: var(--header-bg);
 }
@@ -408,6 +448,7 @@ li .menu .play:hover {
   margin-right: 10px;
   font-size: 16px;
 }
+
 .addForm .form input {
   width: 100%;
   line-height: 32px;
@@ -448,10 +489,12 @@ li .menu .play:hover {
   li .bg {
     width: 100%;
   }
+
   li {
     margin: 0;
     margin-bottom: 15px;
   }
+
   .media {
     max-width: 70%;
     overflow-x: scroll;

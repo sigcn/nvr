@@ -1,6 +1,6 @@
 module github.com/sigcn/nvr
 
-go 1.22
+go 1.23
 
 require (
 	github.com/rs/zerolog v1.26.1
