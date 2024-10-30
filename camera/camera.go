@@ -115,7 +115,7 @@ func (cam *ONVIFCamera) StreamURL() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("invalid stream uri from onvif: %w", err)
 	}
-	streamUrl.User = url.UserPassword(cam.Xusername, cam.Xpassword)
+	streamUrl.User = url.UserPassword(cam.Xusername, url.QueryEscape(cam.Xpassword))
 	return streamUrl.String(), nil
 }
 
