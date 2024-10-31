@@ -1,1 +1,5 @@
 .idea/
+
+webapp_react/node_modules/
+webapp_react/build/
+webapp_react/dist/
