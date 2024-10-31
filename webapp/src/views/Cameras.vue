@@ -1,8 +1,8 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue'
+import { onMounted, ref } from 'vue'
 import http from '../http'
 import mpegts from 'mpegts.js'
-import {onBeforeRouteLeave} from 'vue-router'
+import { onBeforeRouteLeave } from 'vue-router'
 import IconAdd from '@/components/IconAdd.vue'
 import IconMuted from '@/components/IconMuted.vue'
 import IconUnmuted from '@/components/IconUnmuted.vue'
@@ -19,14 +19,9 @@ const passwordRef = ref()
 const saveBtnText = ref('Save')
 const errTips = ref('')
 
-
 onMounted(async () => {
   await reloadAllCameras()
 })
-
-watch(cameras, n => {
-  console.log('cameras: ', n)
-}, {immediate: true})
 
 onBeforeRouteLeave(destroyVideos)
 
@@ -141,7 +136,7 @@ const reloadAllCameras = async () => {
 
 const deleteCamera = async id => {
   if (window.confirm(`Confirm to Del. id:${id}`)) {
-    const {success, msg} = await http.delete(`/v1/api/cameras/${id}`)
+    const { success, msg } = await http.delete(`/v1/api/cameras/${id}`)
     if (!success) {
       window.alert(`删除失败:${msg}`)
       return
@@ -183,8 +178,8 @@ function volumeMuted(i) {
             {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
           </div>
           <div class="muted" @click="volumeMuted(i)">
-            <IconMuted v-if="cam.muted"/>
-            <IconUnmuted v-else/>
+            <IconMuted v-if="cam.muted" />
+            <IconUnmuted v-else />
           </div>
         </div>
         <div class="media">
@@ -216,15 +211,14 @@ function volumeMuted(i) {
     </li>
     <li>
       <div class="addArea" v-if="!formOpened" @click="openForm">
-        <IconAdd class="add"/>
+        <IconAdd class="add" />
       </div>
       <div class="addForm" v-if="formOpened">
         <div class="form">
           <label>Type</label>
           <select>
-            <option>onvif</option>
-          </select
-          ><br/>
+            <option>onvif</option></select
+          ><br />
           <label>Addr</label>
           <input
             ref="addrRef"
@@ -249,10 +243,10 @@ function volumeMuted(i) {
           <div class="errTips">{{ errTips }}</div>
           <div class="btns">
             <a class="btn-save mainbtn" href="javascript:;" @click="saveForm">{{
-                saveBtnText
-              }}</a>
+              saveBtnText
+            }}</a>
             <a class="btn-cancel mainbtn" href="javascript:;" @click="openForm"
-            >Cancel</a
+              >Cancel</a
             >
           </div>
         </div>

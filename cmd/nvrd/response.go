@@ -33,5 +33,5 @@ func Ok(data any) Data {
 }
 
 func ErrForbidden(err error) errdefs.Error {
-	return errdefs.Error{Code: 403, Msg: fmt.Errorf("forbidden: %w", err).Error()}
+	return errdefs.Error{Code: 4030, Msg: fmt.Errorf("forbidden: %w", err).Error()}
 }

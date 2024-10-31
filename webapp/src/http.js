@@ -23,10 +23,9 @@ async function del(url, opts = {}) {
 const sessionKey = () => JSON.parse(localStorage.session || '{}').key || ''
 
 async function request(url, opts = {}) {
-
   let options = {
     method: opts.method || 'GET',
-    headers: {...opts.headers, 'X-ApiKey': sessionKey()},
+    headers: { ...opts.headers, 'X-ApiKey': sessionKey() },
   }
 
   if (opts.body) {
@@ -56,10 +55,6 @@ async function checkResp(resp) {
     throw err
   }
 
-  if (resp.status === 403) {
-    window.location.href = '/'
-  }
-
   if (resp.status != 200 && resp.status != 304) {
     let err = new Error(await resp.text())
     err.code = resp.status
@@ -74,6 +69,6 @@ const http = {
   delete: del,
   request: request,
   apiServer: apiServer,
-  sessionKey
+  sessionKey,
 }
 export default http
