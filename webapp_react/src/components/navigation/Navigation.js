@@ -37,15 +37,15 @@ export default function Navigation({children}) {
 
   return (
     <>
-      <Layout className={'h-screen overflow-y-hidden'}>
-        <Header className={'flex flex-align-center justify-between bg-dark h-14 leading-10 w-screen'}>
-          <div className={'flex flex-align-center'}>
+      <Layout className={'h-screen  w-screen overflow-hidden'}>
+        <Header className={'flex items-center justify-between bg-dark h-14 leading-10'}>
+          <div className={'flex items-center'}>
             <div className={'h-8 w-24 m-4 bg-[#2d1717] rounded-[5px] text-[#f30606] flex justify-center items-center'}>NVR</div>
             <div className={'inline-flex '}>
               {menus.map(menu => {
                 return (
                   <div key={menu.key}
-                       className={'m-2 w-20 flex-align-center justify-center rounded-md cursor-pointer fz-14 text-white/70 hover_text-white'}
+                       className={'m-2 w-20 flex items-center justify-center rounded-md cursor-pointer fz-14 text-white/70 hover_text-white'}
                        style={{backgroundColor: selectedMenuKey.includes(menu.key) ? '#2c88b0' : ''}}
                        onClick={async () => {
                          await router.push(`/${menu.key}`)
@@ -66,10 +66,10 @@ export default function Navigation({children}) {
           </div>
         </Header>
         <Layout>
-          <Content className={'m-4 bg-white'}>
+          <Content className={'bg-white flex-1 overflow-auto'}>
             {children}
           </Content>
-          <Footer className={'justify-center flex-align-center text-center bg-gray-300 h-12'}>
+          <Footer className={'justify-center items-center text-center bg-gray-300 h-12'}>
             footer
           </Footer>
         </Layout>

@@ -10,7 +10,7 @@ export default function Todo({todos = []}) {
   }, [todos])
 
   return <>
-    <div className={'absolute float-right right-20'}>
+    <div className={'absolute float-right right-20 z-10'}>
       <Card title={'Todos'} className={'bg-[#2c88b040]'}>
         {todo.map((t, i) => (
           <div key={i}>

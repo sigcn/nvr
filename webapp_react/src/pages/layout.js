@@ -5,6 +5,11 @@ import {useRouter} from "next/router";
 import React from "react";
 import {ignoreCatch, notBlank} from "@/utils/utils";
 import Navigation from "@/components/navigation/Navigation";
+import {QueryClient, QueryClientProvider} from "react-query";
+import {App} from "antd";
+
+const queryClient = new QueryClient()
+
 
 export default function Layout({children}) {
   const router = useRouter();
@@ -31,7 +36,13 @@ export default function Layout({children}) {
     if (!token) {
       return <Login/>
     } else {
-      return <>{navigation()}</>
+      return (
+        <QueryClientProvider client={queryClient}>
+          <App>
+            {navigation()}
+          </App>
+        </QueryClientProvider>
+      )
     }
   }
 

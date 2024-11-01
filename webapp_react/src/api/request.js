@@ -12,7 +12,8 @@ export const buildUrl = (url) => {
 const loadingInstanceArr = []
 const api = axios.create({
   baseURL: publicRuntimeConfig.BASE_URL,
-  timeout: 10_000
+  // timeout: 1000_000
+  timeout: 1000_0
 });
 
 const loading = () => {
@@ -34,7 +35,7 @@ const loadingFailure = (content = '处理失败') => {
 
 api.interceptors.request.use(config => {
     // loading()
-    config.headers.token = localStorage.token
+    config.headers['X-ApiKey'] = localStorage.token
     return config;
   },
   (error) => {
@@ -44,12 +45,12 @@ api.interceptors.request.use(config => {
 );
 
 api.interceptors.response.use(response => {
-    const {success, msg} = response.data
+    const {code, success = code === 0, msg, data} = response.data
     if (success) {
-      return Promise.resolve(response.data)
+      return Promise.resolve({success, code, msg, data})
     } else {
       messageError(msg)
-      return Promise.reject(response.data)
+      return Promise.reject({success, code, msg, data})
     }
   },
   error => {

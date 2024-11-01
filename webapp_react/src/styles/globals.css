@@ -46,15 +46,6 @@ body {
   text-align: center;
 }
 
-.flex {
-  display: flex;
-}
-
-.flex-align-center {
-  display: flex;
-  align-items: center;
-}
-
 .flex-between-center {
   display: flex;
   align-items: center;
