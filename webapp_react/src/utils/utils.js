@@ -59,12 +59,14 @@ export const messageWarning = (content) => {
 export const messageError = (content = '操作失败') => {
   const key = Math.random()
   content = messageFormat(content)
+  const duration = 10
+
   const withOk = (
     <>
-      {content} <Button size={'small'} type={'text'} danger onClick={() => message.destroy(key)}>关闭</Button>
+      {content}<Button size={'small'} type={'text'} danger onClick={() => message.destroy(key)}>关闭</Button>
     </>
   )
-  message.error({key, content: withOk, type: 'error', duration: 10}).then(ignoreCatch)
+  message.error({key, content: withOk, type: 'error', duration}).then(ignoreCatch)
   messageCountResize(key)
 }
 

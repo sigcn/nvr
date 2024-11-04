@@ -10,8 +10,8 @@ export default function Login() {
 
   const [, setToken] = useAtom(TokenAtom)
   const [, setUserInfo] = useAtom(UserInfoAtom);
-  const [username, setUsername] = React.useState('')
-  const [password, setPassword] = React.useState('')
+  const [username, setUsername] = React.useState('admin')
+  const [password, setPassword] = React.useState('admin')
 
   const [loading, setLoading] = React.useState(false)
 

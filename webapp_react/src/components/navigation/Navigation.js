@@ -3,10 +3,13 @@ import {Dropdown, Layout} from "antd";
 import {HomeOutlined, IdcardOutlined, ImportOutlined, TeamOutlined} from "@ant-design/icons";
 import {useRouter} from "next/router";
 import {messageError, messageSuccess} from "@/utils/utils";
+import {auth} from "@/api/auth";
+import {useAtom} from "jotai/index";
+import {TokenAtom, UserInfoAtom} from "@/context/globalDataContext";
 
 export default function Navigation({children}) {
-  const [userInfo, setUserInfo] = React.useState({})
-  const [logged, setLogged] = React.useState(false)
+  const [token, setToken] = useAtom(TokenAtom)
+  const [userInfo, setUserInfo] = useAtom(UserInfoAtom);
 
   const {Header, Footer, Sider, Content} = Layout
   const [selectedMenuKey, setSelectedMenuKey] = React.useState(['camera'])
@@ -26,7 +29,10 @@ export default function Navigation({children}) {
     }
   }, [router])
 
-  const signOut = () => {
+  const signOut = async () => {
+    await auth.logOut(userInfo)
+    await setUserInfo({})
+    await setToken('')
     messageSuccess('Sign Out Ok.')
   }
 
@@ -66,7 +72,7 @@ export default function Navigation({children}) {
           </div>
         </Header>
         <Layout>
-          <Content className={'bg-white flex-1 overflow-auto'}>
+          <Content className={'flex-1 overflow-auto bg-[#dcdcdc]'}>
             {children}
           </Content>
           <Footer className={'justify-center items-center text-center bg-gray-300 h-12'}>
