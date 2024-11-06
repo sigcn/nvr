@@ -49,7 +49,7 @@ api.interceptors.response.use(response => {
     if (success) {
       return Promise.resolve({success, code, msg, data})
     } else {
-      messageError(msg)
+      // messageError(msg)
       return Promise.reject({success, code, msg, data})
     }
   },

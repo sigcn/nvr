@@ -5,7 +5,9 @@ const nextConfig = {
   distDir: './dist', // Changes the build output directory to `./dist/`.
   publicRuntimeConfig: {
     BASE_URL: process.env.BASE_URL,
-  }
+  },
+  compress: false,
+  images: {unoptimized: true},
 }
 
 module.exports = nextConfig

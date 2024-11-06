@@ -67,12 +67,12 @@ export default function Navigation({children}) {
           </div>
           <div className={'text-red-50'}>
             <Dropdown placement={'bottom'} menu={{items: dropdownMenus.map(e => ({...e}))}}>
-              <div className={'text-white'}>{userInfo.username || 'admin'}</div>
+              <div className={'text-white'}>{userInfo.user?.name || 'admin'}</div>
             </Dropdown>
           </div>
         </Header>
         <Layout>
-          <Content className={'flex-1 overflow-auto bg-[#dcdcdc]'}>
+          <Content className={'flex-1 overflow-auto bg-[#dcdcdc] bg-white'}>
             {children}
           </Content>
           <Footer className={'justify-center items-center text-center bg-gray-300 h-12'}>

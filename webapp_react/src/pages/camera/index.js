@@ -5,30 +5,40 @@ import {camera} from "@/api/camera";
 import {App, FloatButton, Skeleton} from 'antd'
 import {VideoCameraAddOutlined} from "@ant-design/icons";
 import AddCamera from "@/pages/camera/AddCamera";
-import {messageError, messageSuccess} from "@/utils/utils";
-import CameraDetail from './CameraDetail'
+import {ignoreCatch, messageError, messageSuccess} from "@/utils/utils";
+import CameraDetail from "@/pages/camera/CameraDetail";
+
+const todos = [
+  {label: '监控列表', checked: false},
+  {label: '支持监控批量增加(支持按网段)', checked: false},
+  {label: '支持通道切换(主通道占用较大)', checked: false},
+  {label: '切换预览数量', checked: false},
+  {label: '支持动态布局', checked: false},
+]
 
 export default function Camera() {
-  const todos = [
-    {label: '监控列表', checked: false},
-    {label: '支持监控批量增加(支持按网段)', checked: false},
-    {label: '支持通道切换(主通道占用较大)', checked: false},
-    {label: '切换预览数量', checked: false},
-    {label: '支持动态布局', checked: false},
-  ]
-  const {data = {}, isLoading, refetch} = useQuery('cameras', () => camera.list());
-  const {success, ...other} = data
+
   const {modal, message} = App.useApp()
+  const {isLoading, isSuccess, ...query} = useQuery(['cameras'], () => camera.list(), {refetchOnWindowFocus: false});
+  const {success = false, data = []} = query?.data || {}
+
+  const [cameras, setCameras] = React.useState([])
+
+  React.useEffect(() => {
+    if (success) {
+      const arr = data || []
+      setCameras([...arr])
+    }
+  }, [data, success])
 
   const addCameraRef = React.useRef()
 
   const addCameraOk = async () => {
     const {username, password, type, multi, addr, addrStart, addrEnd} = addCameraRef.current.data
     if (!multi) {
-      await camera.save({username, password, type, addr})
-      return
+      const {success} = await camera.save({username, password, type, addr})
+      return success
     }
-
 
     // 将起始 IP 和结束 IP 转换为数组
     const startParts = addrStart.split('.').map(Number);
@@ -37,7 +47,7 @@ export default function Camera() {
     // 确保 IP 地址前 3 段相同，否则返回空数组
     if (startParts[0] !== endParts[0] || startParts[1] !== endParts[1] || startParts[2] !== endParts[2]) {
       messageError('暂只支持在同一网段下')
-      return;
+      return false;
     }
 
     // 获取范围的起始和结束的第四段
@@ -50,23 +60,33 @@ export default function Camera() {
       ipRange.push(`${startParts[0]}.${startParts[1]}.${startParts[2]}.${i}`);
     }
 
-    await Promise.all(ipRange.map(async (ip) => {
-      await camera.save({username, password, type, addr: ip})
-    }))
+    // await Promise.all(ipRange.map(async (ip) => {
+    //   camera.save({username, password, type, addr: ip}).catch(ignoreCatch)
+    // }))
+
+    for (let i = 0; i < ipRange.length; i += 10) {
+      const batch = ipRange.slice(i, i + 10);
+      await Promise.all(batch.map(async (ip) => {
+        try {
+          await camera.save({username, password, type, addr: ip});
+        } catch (err) {
+          ignoreCatch(err);
+        }
+      }));
+    }
 
     messageSuccess('👌')
-    await refetch()
-
+    await query.refetch()
+    return true
   }
 
   const deleteCamera = async (id) => {
-    const {success, data} = await camera.delete(id)
+    const {success, msg} = await camera.delete(id)
     if (success) {
       messageSuccess('👌')
-      await refetch()
-      other.data = other.data.filter(item => item.id !== id)
+      setCameras(o => ([...o.filter(item => item.id !== id)]))
     } else {
-      messageError(data)
+      messageError(msg)
     }
   }
 
@@ -74,18 +94,9 @@ export default function Camera() {
     <Todo todos={todos}/>
 
     <div className={'mt-4 m-4'}>
-
       <Skeleton loading={isLoading}>
         <div className={`grid grid-cols-1 gap-4 sm_grid-cols-1 md_grid-cols-2 lg_grid-cols-3 xl_grid-cols-4`}>
-          {other.data?.map(item => {
-            return <div key={item.id} className={'min-w-[300px] min-h-[400px] rounded-md'}>
-              <CameraDetail item={item} deleteCamera={deleteCamera}/>
-            </div>
-          })}
-
-          {/*<div className={'min-w-[300px] h-[200px] bg-blue-300 p-4 rounded-md flex justify-center cursor-pointer'}>*/}
-          {/*  <VideoCameraAddOutlined className={'text-6xl text-green-900'}/>*/}
-          {/*</div>*/}
+          {cameras.map(item => (<div key={item.id} className={'rounded-md'}><CameraDetail item={item} deleteCamera={deleteCamera}/></div>))}
         </div>
       </Skeleton>
 
