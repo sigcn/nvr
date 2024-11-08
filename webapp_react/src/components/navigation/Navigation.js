@@ -1,25 +1,25 @@
-import React, {useEffect} from "react";
-import {Dropdown, Layout} from "antd";
-import {HomeOutlined, IdcardOutlined, ImportOutlined, TeamOutlined} from "@ant-design/icons";
-import {useRouter} from "next/router";
-import {messageError, messageSuccess} from "@/utils/utils";
-import {auth} from "@/api/auth";
-import {useAtom} from "jotai/index";
-import {TokenAtom, UserInfoAtom} from "@/context/globalDataContext";
+import React, { useEffect } from 'react'
+import { Button, Dropdown, Layout } from 'antd'
+import { HomeOutlined, IdcardOutlined, ImportOutlined, TeamOutlined } from '@ant-design/icons'
+import { useRouter } from 'next/router'
+import { messageError, messageSuccess } from '@/utils/utils'
+import { auth } from '@/api/auth'
+import { useAtom } from 'jotai/index'
+import { TokenAtom, UserInfoAtom } from '@/context/globalDataContext'
 
-export default function Navigation({children}) {
+export default function Navigation({ children }) {
   const [token, setToken] = useAtom(TokenAtom)
-  const [userInfo, setUserInfo] = useAtom(UserInfoAtom);
+  const [userInfo, setUserInfo] = useAtom(UserInfoAtom)
 
-  const {Header, Footer, Sider, Content} = Layout
+  const { Header, Footer, Sider, Content } = Layout
   const [selectedMenuKey, setSelectedMenuKey] = React.useState(['camera'])
 
   const menus = [
-    {label: '监控', key: 'camera', icon: <HomeOutlined/>},
-    {label: '录制', key: 'record', icon: <ImportOutlined/>},
-    {label: '存储', key: 'storage', icon: <TeamOutlined/>},
-    {label: '用户', key: 'user', icon: <IdcardOutlined/>},
-  ];
+    { label: '监控', key: 'camera', icon: <HomeOutlined /> },
+    { label: '录制', key: 'record', icon: <ImportOutlined /> },
+    { label: '存储', key: 'storage', icon: <TeamOutlined /> },
+    { label: '用户', key: 'user', icon: <IdcardOutlined /> },
+  ]
 
   const router = useRouter()
 
@@ -37,8 +37,8 @@ export default function Navigation({children}) {
   }
 
   const dropdownMenus = [
-    {label: 'Sign Out', key: 'sign out', danger: true, onClick: signOut},
-    {label: 'Other', key: 'other', onClick: () => messageError('Click Other.')},
+    { label: 'Sign Out', key: 'sign out', danger: true, onClick: signOut },
+    { label: 'Other', key: 'other', onClick: () => messageError('Click Other.') },
   ]
 
   return (
@@ -52,7 +52,7 @@ export default function Navigation({children}) {
                 return (
                   <div key={menu.key}
                        className={'m-2 w-20 flex items-center justify-center rounded-md cursor-pointer fz-14 text-white/70 hover_text-white'}
-                       style={{backgroundColor: selectedMenuKey.includes(menu.key) ? '#2c88b0' : ''}}
+                       style={{ backgroundColor: selectedMenuKey.includes(menu.key) ? '#2c88b0' : '' }}
                        onClick={async () => {
                          await router.push(`/${menu.key}`)
                          setSelectedMenuKey([menu.key])
@@ -66,7 +66,7 @@ export default function Navigation({children}) {
             </div>
           </div>
           <div className={'text-red-50'}>
-            <Dropdown placement={'bottom'} menu={{items: dropdownMenus.map(e => ({...e}))}}>
+            <Dropdown placement={'bottom'} menu={{ items: dropdownMenus.map(e => ({ ...e })) }}>
               <div className={'text-white'}>{userInfo.user?.name || 'admin'}</div>
             </Dropdown>
           </div>
@@ -75,8 +75,10 @@ export default function Navigation({children}) {
           <Content className={'flex-1 overflow-auto bg-[#dcdcdc] bg-white'}>
             {children}
           </Content>
-          <Footer className={'justify-center items-center text-center bg-gray-300 h-12'}>
-            footer
+          <Footer className={'flex justify-center items-center text-center bg-gray-300 h-12'}>
+            <Button ghost className={'border-0'}>
+              footer
+            </Button>
           </Footer>
         </Layout>
       </Layout>

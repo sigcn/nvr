@@ -1,22 +1,22 @@
-import {TokenAtom} from "@/context/globalDataContext";
-import {useAtom} from "jotai";
-import React from "react";
-import {Button, Card, Modal} from "antd";
-import getConfig from "next/config";
-import Svg from "@/svgs/Svg";
-import Volume from '@/svgs/volume.svg'
-import Volume_Close from '@/svgs/volume_close.svg'
-import useOnScreen from "@/hooks/useOnScreen";
-import {ignoreCatch} from "@/utils/utils";
+import { TokenAtom } from '@/context/globalDataContext'
+import { useAtom } from 'jotai'
+import React from 'react'
+import { Button, Card, Modal, Tooltip } from 'antd'
+import getConfig from 'next/config'
+import Svg from '@/svgs/Svg'
+import useOnScreen from '@/hooks/useOnScreen'
+import { ignoreCatch } from '@/utils/utils'
+import TPLink from '@/svgs/TPLink.svg'
+import { CaretRightFilled, DeleteOutlined, MutedFilled, PauseOutlined, SoundFilled } from '@ant-design/icons'
 
-export default function CameraDetail({item, deleteCamera}) {
+export default function CameraDetail({ item, deleteCamera, openCameraById }) {
   const {publicRuntimeConfig} = getConfig()
 
   const [token] = useAtom(TokenAtom)
   const videoRef = React.useRef()
   const cardRef = React.useRef()
-  const visibility = useOnScreen(cardRef);
-  const {Meta} = Card;
+  const visibility = useOnScreen(cardRef)
+  const { Meta } = Card
 
   const [mouseEnter, setMouseEnter] = React.useState(false)
   const [playing, setPlaying] = React.useState(false)
@@ -33,14 +33,14 @@ export default function CameraDetail({item, deleteCamera}) {
         type: 'mpegts',
         isLive: true,
         url: previewUrl,
-      });
+      })
 
       playerRef.current = player
 
-      player.attachMediaElement(videoRef.current);
-      player.load();
+      player.attachMediaElement(videoRef.current)
+      player.load()
       player.muted = true
-      player.play();
+      player.play()
       setPlaying(true)
 
       player.on(mpegts.Events.ERROR, (ErrorTypes, ErrorDetails, ErrorInfo, ...other) => {
@@ -48,7 +48,7 @@ export default function CameraDetail({item, deleteCamera}) {
       })
 
     } else {
-      console.error('当前浏览器不支持 MSE');
+      console.error('当前浏览器不支持 MSE')
     }
   }, [previewUrl])
 
@@ -77,7 +77,7 @@ export default function CameraDetail({item, deleteCamera}) {
     // 清理函数
     return () => {
       destroyLiveVideo()
-    };
+    }
   }, [destroyLiveVideo, loadLiveVideo, visibility])
 
 
@@ -103,8 +103,8 @@ export default function CameraDetail({item, deleteCamera}) {
 
   const del = () => {
     Modal.confirm({
-      title: '确认删除',
-      content: '确认删除该设备？',
+      title: '删除',
+      content: `确认删除 ${item.remark}？`,
       okText: '确认',
       cancelText: '取消',
       onOk: () => deleteCamera && deleteCamera(item.id)
@@ -119,30 +119,31 @@ export default function CameraDetail({item, deleteCamera}) {
       onMouseLeave={() => setMouseEnter(false)}
       className={'w-full shadow-xl duration-300 transition-opacity opacity-95 hover_opacity-100'}
       cover={<video ref={videoRef} width={'100%'} height={'100%'} controls/>}
+      title={(
+        <div className={'flex'}>
+          <Svg src={TPLink} width={'36'} />
+          <h3 className={'flex items-center ml-2'}>{item?.meta?.model}</h3>
+        </div>
+      )}
+      extra={<h3>{item.remark || 'Remark'}</h3>}
     >
       <div className={'flex items-center justify-between'}>
         <div className={'flex'}>
-          <Button size={'small'} onClick={() => handleMuteClick()}><Svg src={muted ? Volume_Close : Volume} width={'24'} height={'24'}/></Button>
-          <Button size={'small'} className={'ml-1'} onClick={() => handlePlayClick()}>{playing ? 'Playing' : 'Pausing'}</Button>
+          {muted && <Tooltip title={'UnMute'}><Button danger size={'small'} onClick={() => handleMuteClick()}><MutedFilled /></Button></Tooltip>}
+          {!muted && <Tooltip title={'Mute'}><Button size={'small'} onClick={() => handleMuteClick()}><SoundFilled /></Button></Tooltip>}
+
+          {playing && <Tooltip title={'Pause'}><Button size={'small'} className={'ml-1'} onClick={() => handlePlayClick()}><CaretRightFilled /></Button></Tooltip>}
+          {!playing && <Tooltip title={'Play'}><Button danger size={'small'} className={'ml-1'} onClick={() => handlePlayClick()}><PauseOutlined /></Button></Tooltip>}
         </div>
 
         <div className={'flex'}>
           {mouseEnter && (
-            <Button.Group>
-              <Button size={'small'} key={'1'} type={'dashed'}>测试1</Button>
-              <Button size={'small'} key={'2'} type={'dashed'}>测试2</Button>
-              <Button size={'small'} key={'del'} danger onClick={() => del()}>删除</Button>
-            </Button.Group>
+            <div className={'flex'}>
+              <Button size={'small'} onClick={() => openCameraById && openCameraById()}>Enter</Button>
+              <Button size={'small'} className={'ml-1'} danger onClick={() => del()}><DeleteOutlined /></Button>
+            </div>
           )}
         </div>
-      </div>
-
-      <div className={'flex'}>
-        <span className={'text-xs'}>
-          {item?.meta?.model}
-          {item?.meta?.firmware_version}
-          {item?.meta?.serial_number}
-        </span>
       </div>
     </Card>
   </>
