@@ -61,6 +61,7 @@ async function signout() {
   color: #fff;
   font-size: 30px;
   text-align: center;
+  user-select: none;
 }
 .header .user {
   float: right;

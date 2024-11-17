@@ -98,6 +98,7 @@ async function signIn() {
   text-align: center;
   border-radius: 2px;
   box-shadow: 0 0 5px #ccc;
+  user-select: none;
 }
 
 .left-side .line {
