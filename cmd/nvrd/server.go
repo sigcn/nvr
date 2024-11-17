@@ -110,7 +110,7 @@ func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
 		var writer io.Writer = w
 		r, _ := strconv.ParseInt(r.URL.Query().Get("rate"), 10, 64)
 		if r > 0 {
-			writer = &ratelimitWriter{w: w, limiter: rate.NewLimiter(rate.Limit(r), int(r))}
+			writer = &ratelimitWriter{w: w, limiter: rate.NewLimiter(rate.Limit(r), int(r*3))}
 		}
 		if err := fsRecorder.(*recorder.FSRecorder).Read(time.Unix(posSecs, 0), writer); err != nil {
 			Err(err).MarshalTo(w)
