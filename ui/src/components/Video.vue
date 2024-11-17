@@ -50,6 +50,7 @@ async function init(src, pos) {
       media.value.audioCodec = mediaInfo.audioCodec
       media.value.fps = mediaInfo.fps
     })
+    media.value.playing = false
     media.value.loading = true
     player.value.load()
     try {

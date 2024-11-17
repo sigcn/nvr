@@ -10,6 +10,7 @@ const filterDay = ref(new Date())
 const duration = ref(24 * 3600)
 const lastPlayOffet = ref(0)
 const currentTime = ref(0)
+const camera = ref({})
 const video = ref()
 
 onMounted(requestVideo)
@@ -22,6 +23,7 @@ async function selectDay(day) {
 }
 
 async function requestVideo() {
+  camera.value.disableTimeUpdate = false
   lastPlayOffet.value = Number(currentTime.value)
   let selectDate = new Date(filterDay.value)
   selectDate.setHours(0, 0, 0, 0)
@@ -39,7 +41,7 @@ function formatTime(time) {
 
 function updateProgress(e) {
   let newTime = Number(lastPlayOffet.value) + Math.floor(e.currentTime)
-  if (newTime < currentTime.value) {
+  if (camera.value.disableTimeUpdate) {
     return
   }
   currentTime.value = newTime
@@ -67,7 +69,7 @@ function updateProgress(e) {
           :max="duration"
           step="1"
           v-model="currentTime"
-          @input="video.pause"
+          @input="camera.disableTimeUpdate = true"
           @change="requestVideo"
         />
         <div class="">{{ formatTime(currentTime) }}</div>
@@ -121,6 +123,12 @@ function updateProgress(e) {
 </style>
 
 <style>
-.datepicker-inner {width: 238px;}
-.datepicker-ctrl p, .datepicker-ctrl span, .datepicker-body span {width: 30px;}
+.datepicker-inner {
+  width: 238px;
+}
+.datepicker-ctrl p,
+.datepicker-ctrl span,
+.datepicker-body span {
+  width: 30px;
+}
 </style>
