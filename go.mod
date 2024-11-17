@@ -6,6 +6,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/use-go/onvif v0.0.9
+	golang.org/x/time v0.5.0
 	storj.io/common v0.0.0-20241014122736-47dfa836934a
 )
 

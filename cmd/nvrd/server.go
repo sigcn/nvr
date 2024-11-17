@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -17,6 +19,7 @@ import (
 	"github.com/sigcn/nvr/camera"
 	"github.com/sigcn/nvr/errdefs"
 	"github.com/sigcn/nvr/recorder"
+	"golang.org/x/time/rate"
 )
 
 type CreateCamera struct {
@@ -103,7 +106,13 @@ func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
 			ErrBadRequest.Wrap(err).MarshalTo(w)
 			return
 		}
-		if err := fsRecorder.(*recorder.FSRecorder).Read(time.Unix(posSecs, 0), w); err != nil {
+
+		var writer io.Writer = w
+		r, _ := strconv.ParseInt(r.URL.Query().Get("rate"), 10, 64)
+		if r > 0 {
+			writer = &ratelimitWriter{w: w, limiter: rate.NewLimiter(rate.Limit(r), int(r))}
+		}
+		if err := fsRecorder.(*recorder.FSRecorder).Read(time.Unix(posSecs, 0), writer); err != nil {
 			Err(err).MarshalTo(w)
 			return
 		}
@@ -278,4 +287,14 @@ func stopCameras(cameraStore camera.Store, recorderManager *recorder.Manager) {
 		}
 	}
 	slog.Info("Cameras stop", "live-count", recorderManager.Count())
+}
+
+type ratelimitWriter struct {
+	w       io.Writer
+	limiter *rate.Limiter
+}
+
+func (r *ratelimitWriter) Write(p []byte) (int, error) {
+	r.limiter.WaitN(context.Background(), len(p))
+	return r.w.Write(p)
 }
