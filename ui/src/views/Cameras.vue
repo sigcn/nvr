@@ -1,14 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import http from '../http'
-import mpegts from 'mpegts.js'
-import { onBeforeRouteLeave } from 'vue-router'
-import IconAdd from '@/components/IconAdd.vue'
-import IconMuted from '@/components/IconMuted.vue'
-import IconUnmuted from '@/components/IconUnmuted.vue'
+import http from '@/http'
+import Video from '@/components/Video.vue'
+import IconAdd from '@/components/icons/IconAdd.vue'
 
 const cameras = ref([])
-const videos = ref([])
 const addr = ref()
 const username = ref()
 const password = ref()
@@ -23,52 +19,7 @@ onMounted(async () => {
   let sessionVal = window.localStorage.getItem('session')
   let session = JSON.parse(sessionVal)
   await loadCameras(session)
-  loadVideos(session)
 })
-
-onBeforeRouteLeave(destroyVideos)
-
-async function destroyVideos() {
-  videos.value.forEach((v, i) => {
-    v.player.destroy()
-  })
-}
-
-async function loadVideos(session) {
-  videos.value.forEach(async (v, i) => {
-    if (mpegts.getFeatureList().mseLivePlayback) {
-      var player = mpegts.createPlayer({
-        type: 'mpegts',
-        isLive: true,
-        url: `${http.apiServer}${v.dataset.url}?api_key=${session.key}`,
-      })
-      player.attachMediaElement(v)
-      player.on(mpegts.Events.MEDIA_INFO, function (mediaInfo) {
-        console.log('Media Info:', mediaInfo)
-        cameras.value[i].videoCodec = mediaInfo.videoCodec
-        cameras.value[i].audioCodec = mediaInfo.audioCodec
-        cameras.value[i].fps = mediaInfo.fps
-      })
-      v.muted = true
-      cameras.value[i].muted = true
-      v.player = player
-      cameras.value[i].loading = true
-      player.load()
-      try {
-        await player.play()
-        cameras.value[i].playing = true
-        cameras.value[i].loading = false
-      } catch (_) {
-        setTimeout(() => {
-          player.unload()
-          player.detachMediaElement()
-          cameras.value[i].playing = false
-          cameras.value[i].loading = false
-        }, 100)
-      }
-    }
-  })
-}
 
 async function loadCameras(session) {
   let r = await http.get('/v1/api/cameras', { session: session })
@@ -77,27 +28,6 @@ async function loadCameras(session) {
     return
   }
   cameras.value = r.data
-}
-
-async function play(i) {
-  if (cameras.value[i].playing) {
-    stop(i)
-    return
-  }
-  let player = videos.value[i].player
-  player.attachMediaElement(videos.value[i])
-  player.load()
-  cameras.value[i].loading = true
-  await player.play()
-  cameras.value[i].playing = true
-  cameras.value[i].loading = false
-}
-
-function stop(i) {
-  let player = videos.value[i].player
-  player.unload()
-  player.detachMediaElement()
-  cameras.value[i].playing = false
 }
 
 async function saveForm() {
@@ -140,47 +70,14 @@ function openForm() {
   errTips.value = ''
   formOpened.value = !formOpened.value
 }
-
-function volumeMuted(i) {
-  cameras.value[i].muted = !cameras.value[i].muted
-  videos.value[i].muted = cameras.value[i].muted
-}
 </script>
 <template>
   <ul>
     <li v-for="(cam, i) in cameras">
-      <div class="bg" v-if="!cam.playing">no video signal</div>
-      <video
-        ref="videos"
-        @mouseenter="cam.showmenu = true"
-        @mouseleave="cam.showmenu = false"
-        :data-url="`/media/${cam.id}/live.ts`"
-        :style="`display: ${cam.playing ? 'block' : 'none'}`"
-      ></video>
-      <div
-        class="menu"
-        v-if="!cam.playing || cam.showmenu"
-        @mouseenter="cam.showmenu = true"
-        @mouseleave="cam.showmenu = false"
-      >
-        <div class="ops">
-          <div class="play" @click="play(i)">
-            {{ cam.playing ? 'Stop' : cam.loading ? '•' : 'Play' }}
-          </div>
-          <div class="muted" @click="volumeMuted(i)">
-            <IconMuted v-if="cam.muted" />
-            <IconUnmuted v-else />
-          </div>
-        </div>
-        <div class="media">
-          <label>videoCodec</label>
-          <span>{{ cam.videoCodec }}</span>
-          <label>audioCodec</label>
-          <span>{{ cam.audioCodec }}</span>
-          <label>fps</label>
-          <span>{{ cam.fps }}</span>
-        </div>
-      </div>
+      <Video
+        :src="`${http.apiServer}/media/${cam.id}/live.ts`"
+        :muted="true"
+      ></Video>
       <div class="desc">
         <div class="text">
           <div class="b remark">
@@ -256,23 +153,8 @@ li {
   flex-direction: column;
   position: relative;
   margin: 0 15px 10px 0;
-}
-li,
-.bg,
-video {
-  color: #fff;
-}
-video,
-.bg {
-  aspect-ratio: 16/9;
-  width: 560px;
-  border-radius: 5px 5px 0 0;
-  background-color: #333;
-}
-.bg {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  border-radius: 3px 3px 0 0;
+  overflow: hidden;
 }
 
 li .desc {
@@ -316,61 +198,6 @@ li .desc .enter {
 
 li .desc .enter:hover {
   color: #0f6157;
-}
-
-li .menu {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 40px;
-  padding: 10px;
-  position: absolute;
-  bottom: 50px;
-  z-index: 100;
-  width: 100%;
-  background-color: #023630;
-  opacity: 0.8;
-}
-li .menu .media {
-  color: #ccc;
-  font-size: 10px;
-}
-li .menu .media label {
-  margin: 5px;
-}
-li .menu .media span {
-  font-weight: bold;
-}
-
-li .menu .muted {
-  display: inline-block;
-  line-height: 30px;
-  margin: -2px 0 0 10px;
-  cursor: pointer;
-}
-li .menu .muted svg {
-  width: 22px;
-  height: 22px;
-
-  display: inline-block;
-  vertical-align: middle;
-}
-li .menu .play {
-  display: inline-block;
-  width: 60px;
-  height: 30px;
-  line-height: 30px;
-  background-color: #044941;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  border: 1px solid #023630;
-  text-align: center;
-}
-
-li .menu .play:hover {
-  background-color: #0f6157;
 }
 
 .addArea {
@@ -443,18 +270,13 @@ li .menu .play:hover {
 }
 
 @media screen and (max-width: 1024px) {
-  li,
-  li video,
-  li .bg {
-    width: 100%;
-  }
   li {
+    width: 100%;
     margin: 0;
     margin-bottom: 15px;
   }
-  .media {
-    max-width: 70%;
-    overflow-x: scroll;
+  ul {
+    padding: 0;
   }
 }
 </style>
