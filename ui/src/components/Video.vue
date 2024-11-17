@@ -35,7 +35,7 @@ async function init(src, pos) {
   if (mpegts.getFeatureList().mseLivePlayback) {
     let url = `${src}?api_key=${session.key}`
     if (pos) {
-      url = `${url}&pos=${pos}`
+      url = `${url}&pos=${pos}&rate=204800`
       media.value.pos = pos
     }
     player.value = mpegts.createPlayer({
