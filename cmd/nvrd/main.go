@@ -14,7 +14,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/sigcn/nvr/account"
 	"github.com/sigcn/nvr/camera"
-	"github.com/sigcn/nvr/cmd/nvrd/static"
+	"github.com/sigcn/nvr/cmd/nvrd/ui"
 	"github.com/sigcn/nvr/recorder"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/use-go/onvif/sdk"
@@ -71,13 +71,13 @@ func main() {
 }
 
 func handleStaticFiles(w http.ResponseWriter, r *http.Request) {
-	f, err := static.FS.Open(strings.TrimPrefix(r.URL.Path, "/"))
+	f, err := ui.FS.Open(strings.TrimPrefix(r.URL.Path, "/"))
 	if err != nil {
-		http.ServeFileFS(w, r, static.FS, "index.html")
+		http.ServeFileFS(w, r, ui.FS, "index.html")
 		return
 	}
 	f.Close()
-	http.ServeFileFS(w, r, static.FS, strings.TrimPrefix(r.URL.Path, "/"))
+	http.ServeFileFS(w, r, ui.FS, strings.TrimPrefix(r.URL.Path, "/"))
 }
 
 func printVersion(s string) error {
