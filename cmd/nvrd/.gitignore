@@ -1,7 +1,7 @@
 nvrd
-static/*/*.css
-static/*/*.js
-static/*/*.svg
-static/*/*.ico
-static/*.html
-static/*.ico
+ui/*/*.css
+ui/*/*.js
+ui/*/*.svg
+ui/*/*.ico
+ui/*.html
+ui/*.ico
