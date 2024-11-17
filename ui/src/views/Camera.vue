@@ -102,7 +102,7 @@ function updateProgress(e) {
   width: 100%;
 }
 .filter {
-  padding: 0 0 0 10px;
+  padding: 0 0 0 20px;
 }
 @media screen and (max-width: 1024px) {
   .cameraContainer {
@@ -118,4 +118,9 @@ function updateProgress(e) {
     width: 100%;
   }
 }
+</style>
+
+<style>
+.datepicker-inner {width: 238px;}
+.datepicker-ctrl p, .datepicker-ctrl span, .datepicker-body span {width: 30px;}
 </style>
