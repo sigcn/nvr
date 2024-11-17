@@ -112,13 +112,10 @@ function updateProgress(e) {
   }
   .videoArea {
     width: 100%;
+    border-radius: 0;
   }
   .filter {
     width: 100%;
-  }
-  .bg,
-  video {
-    border-radius: 0;
   }
 }
 </style>
