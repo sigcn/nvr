@@ -180,6 +180,22 @@ func (s *server) handleListCameras(w http.ResponseWriter, r *http.Request) {
 	Ok(list).MarshalTo(w)
 }
 
+func (s *server) handleGetCamera(w http.ResponseWriter, r *http.Request) {
+	cameraID := r.PathValue("camera_id")
+	cam, err := s.cameraStore.Get(cameraID)
+	if err != nil {
+		Err(err).MarshalTo(w)
+		return
+	}
+
+	Ok(ListCamera{
+		ID:     cam.ID(),
+		Type:   cam.Type(),
+		Remark: cam.Remark(),
+		Meta:   cam.Meta(),
+	}).MarshalTo(w)
+}
+
 func (s *server) handleDeleteCamera(w http.ResponseWriter, r *http.Request) {
 	cameraID := r.PathValue("camera_id")
 	s.recorderManager.Delete(cameraID)
