@@ -13,7 +13,10 @@ const currentTime = ref(0)
 const camera = ref({})
 const video = ref()
 
-onMounted(requestVideo)
+onMounted(() => {
+  loadCamera()
+  requestVideo()
+})
 
 async function selectDay(day) {
   filterDay.value = day
@@ -53,6 +56,18 @@ function updateProgress(e) {
     currentTime.value = 0
   }
 }
+
+async function loadCamera() {
+  let session = JSON.parse(window.localStorage.getItem('session'))
+  let r = await http.get(`/v1/api/cameras/${route.params.id}`, {
+    session: session,
+  })
+  console.log(r)
+  if (r.code != 0) {
+    return
+  }
+  camera.value = r.data
+}
 </script>
 
 <template>
@@ -75,14 +90,26 @@ function updateProgress(e) {
         <div class="">{{ formatTime(currentTime) }}</div>
       </div>
     </div>
-    <div class="filter">
+    <div class="operation">
+      <div class="camera">
+        <div class="title">
+          {{
+            camera.remark || camera.meta ? camera.meta.manufacturer : 'loading'
+          }}
+        </div>
+        <div class="manufacturer">
+          {{ camera.meta ? camera.meta.manufacturer : 'loading' }}
+        </div>
+        <div class="model">
+          {{ camera.meta ? camera.meta.model : 'loading' }}
+        </div>
+      </div>
       <Calendar
         v-model="filterDay"
         :has-input="false"
         @day-click="selectDay"
         :show-date-only="true"
-      >
-      </Calendar>
+      ></Calendar>
     </div>
   </div>
 </template>
@@ -103,8 +130,26 @@ function updateProgress(e) {
 .videoArea .progress {
   width: 100%;
 }
-.filter {
-  padding: 0 0 0 20px;
+.operation {
+  padding: 0 0 0 13px;
+}
+
+.camera {
+  margin: 0 0 10px 0;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.camera .title {
+  font-size: 18px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 5px;
+}
+.camera .manufacturer,
+.camera .model {
+  line-height: 26px;
+  font-size: 13px;
+  color: darkslategray;
 }
 @media screen and (max-width: 1024px) {
   .cameraContainer {
@@ -124,11 +169,11 @@ function updateProgress(e) {
 
 <style>
 .datepicker-inner {
-  width: 238px;
+  width: 245px;
 }
 .datepicker-ctrl p,
 .datepicker-ctrl span,
 .datepicker-body span {
-  width: 30px;
+  width: 31px;
 }
 </style>
