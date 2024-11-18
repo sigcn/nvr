@@ -13,7 +13,7 @@ async function signout() {
   let session = JSON.parse(sessionVal)
   window.localStorage.removeItem('session')
   await http.delete('/v1/api/keys', { session: session })
-  window.location.href = '/'
+  window.location.reload()
 }
 </script>
 <template>
