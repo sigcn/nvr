@@ -206,12 +206,18 @@ li .desc .enter:hover {
   justify-content: center;
   height: 100%;
   cursor: pointer;
+  min-height: 346px;
 }
 .addArea:hover {
   background-color: var(--header-bg);
 }
 
+.addArea:hover .add {
+  fill: #e6e6e6;
+}
+
 .addArea .add {
+  fill: #f6f8fa;
   width: 120px;
   height: 120px;
 }
