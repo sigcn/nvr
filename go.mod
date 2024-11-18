@@ -18,6 +18,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/juju/errors v0.0.0-20220331221717-b38fca44723b // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
-	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
 )
