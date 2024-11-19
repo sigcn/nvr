@@ -96,26 +96,7 @@ func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
 	}
 	pos := r.URL.Query().Get("pos")
 	if pos != "" {
-		fsRecorder, err := s.recorderManager.FS(cameraID)
-		if err != nil {
-			errdefs.ErrCameraNotFound.MarshalTo(w)
-			return
-		}
-		posSecs, err := strconv.ParseInt(pos, 10, 64)
-		if err != nil {
-			ErrBadRequest.Wrap(err).MarshalTo(w)
-			return
-		}
-
-		var writer io.Writer = w
-		r, _ := strconv.ParseInt(r.URL.Query().Get("rate"), 10, 64)
-		if r > 0 {
-			writer = &ratelimitWriter{w: w, limiter: rate.NewLimiter(rate.Limit(r), int(r*3))}
-		}
-		if err := fsRecorder.(*recorder.FSRecorder).Read(time.Unix(posSecs, 0), writer); err != nil {
-			Err(err).MarshalTo(w)
-			return
-		}
+		s.handleMediaMPEGTSWithPos(w, r)
 		return
 	}
 	liveRecorder, err := s.recorderManager.Live(cameraID)
@@ -124,6 +105,53 @@ func (s *server) handleMediaMPEGTS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	<-liveRecorder.(*recorder.LiveRecorder).AddWriter(generateID(), w)
+}
+
+func (s *server) handleMediaMPEGTSWithPos(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Accept-Ranges", "bytes")
+	cameraID := r.PathValue("camera_id")
+	fsRecorder, err := s.recorderManager.FS(cameraID)
+	if err != nil {
+		errdefs.ErrCameraNotFound.MarshalTo(w)
+		return
+	}
+	pos := r.URL.Query().Get("pos")
+	posSecs, err := strconv.ParseInt(pos, 10, 64)
+	if err != nil {
+		ErrBadRequest.Wrap(err).MarshalTo(w)
+		return
+	}
+
+	var writer io.Writer = w
+
+	ra, _ := strconv.ParseInt(r.URL.Query().Get("rate"), 10, 64)
+	if ra > 0 {
+		writer = &ratelimitWriter{w: writer, limiter: rate.NewLimiter(rate.Limit(ra), int(ra*3))}
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	rangeHeader := r.Header.Get("Range")
+	if rangeHeader != "" {
+		ranges := strings.Split(rangeHeader, "-")
+		if len(ranges) != 2 {
+			ErrBadRequest.Wrap(errors.New("invalid range header")).MarshalTo(w)
+			return
+		}
+		start, _ := strconv.ParseInt(ranges[0], 10, 64)
+		stop, _ := strconv.ParseInt(ranges[1], 10, 64)
+		if stop != 0 && stop <= start {
+			ErrBadRequest.Wrap(errors.New("invalid range header")).MarshalTo(w)
+			return
+		}
+		writer = &rangeWriter{w: writer, start: start, stop: stop, cancel: cancel}
+	}
+
+	if err := fsRecorder.(*recorder.FSRecorder).Read(ctx, time.Unix(posSecs, 0), writer); err != nil {
+		Err(err).MarshalTo(w)
+		return
+	}
 }
 
 func (s *server) handleCreateCamera(w http.ResponseWriter, r *http.Request) {
@@ -313,4 +341,45 @@ type ratelimitWriter struct {
 func (r *ratelimitWriter) Write(p []byte) (int, error) {
 	r.limiter.WaitN(context.Background(), len(p))
 	return r.w.Write(p)
+}
+
+type rangeWriter struct {
+	w      io.Writer
+	start  int64
+	stop   int64
+	cancel context.CancelFunc
+
+	written int64
+}
+
+func (w *rangeWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	lenp := int64(n)
+	if w.start > 0 {
+		sb := w.start - w.written
+		if lenp <= sb {
+			w.written += lenp
+			return
+		}
+		if sb > 0 {
+			w.written += sb
+			p = p[sb:]
+			lenp = int64(len(p))
+		}
+	}
+	if w.stop > 0 {
+		wb := w.stop - w.written
+		if wb > lenp {
+			w.written += lenp
+			_, err = w.w.Write(p)
+			return
+		}
+		defer w.cancel()
+		w.written += wb
+		_, err = w.w.Write(p[:wb])
+		return
+	}
+	w.written += lenp
+	_, err = w.w.Write(p)
+	return
 }

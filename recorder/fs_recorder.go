@@ -1,13 +1,16 @@
 package recorder
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -71,19 +74,30 @@ func (r *FSRecorder) Interrupt() error {
 	return errors.New("not started yet")
 }
 
-func (r *FSRecorder) Read(t time.Time, w io.Writer) error {
+func (r *FSRecorder) Read(ctx context.Context, t time.Time, w io.Writer) error {
 	dir := path.Join(r.Path, t.Format("2006-01"))
 	videoFile, err := r.findFirstVideoTimestamp(dir, t)
 	if err != nil {
 		return err
 	}
+	var cmd atomic.Pointer[exec.Cmd]
+	go func() {
+		<-ctx.Done()
+		if c := cmd.Load(); c != nil {
+			c.Process.Kill()
+		}
+	}()
 	offset := max(t.Sub(*videoFile).Seconds(), 0)
 	for {
-		err = ffmpeg.Input(path.Join(dir, videoFile.Format("02_15-04-05.ts")),
+		c := ffmpeg.Input(path.Join(dir, videoFile.Format("02_15-04-05.ts")),
 			ffmpeg.KwArgs{"ss": offset}).WithOutput(w).Output("-",
 			ffmpeg.KwArgs{"c": "copy"},
-			ffmpeg.KwArgs{"f": "mpegts"}).Run()
-		if err != nil {
+			ffmpeg.KwArgs{"f": "mpegts"}).Compile()
+		cmd.Store(c)
+		if err := c.Run(); err != nil {
+			if strings.Contains(err.Error(), "signal: killed") {
+				return nil
+			}
 			return err
 		}
 
