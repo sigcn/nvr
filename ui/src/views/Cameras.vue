@@ -77,6 +77,7 @@ function openForm() {
       <Video
         :src="`${http.apiServer}/media/${cam.id}/live.ts`"
         :muted="true"
+        :live="true"
       ></Video>
       <div class="desc">
         <div class="text">

@@ -10,7 +10,11 @@ import IconMuted from './icons/IconMuted.vue'
 import IconUnmuted from './icons/IconUnmuted.vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
-const props = defineProps({ src: {}, muted: { type: Boolean, default: false } })
+const props = defineProps({
+  src: {},
+  muted: { type: Boolean, default: false },
+  live: { type: Boolean, default: false },
+})
 const emit = defineEmits(['timeupdate'])
 
 const player = ref()
@@ -19,7 +23,7 @@ const media = ref({})
 
 onMounted(async () => {
   if (props.src) {
-    init(props.src)
+    init(props.src, undefined, props.live)
   }
 })
 
@@ -29,20 +33,23 @@ onBeforeRouteLeave(() => {
 
 defineExpose({ init, pause, mute })
 
-async function init(src, pos) {
+async function init(src, pos, live) {
   player.value?.destroy()
   let session = JSON.parse(window.localStorage.getItem('session') || '{}')
   if (mpegts.getFeatureList().mseLivePlayback) {
     let url = `${src}?api_key=${session.key}`
     if (pos) {
-      url = `${url}&pos=${pos}&rate=524288`
+      url = `${url}&pos=${pos}&rate=5242880`
       media.value.pos = pos
     }
-    player.value = mpegts.createPlayer({
-      type: 'mpegts',
-      isLive: true,
-      url: url,
-    })
+    player.value = mpegts.createPlayer(
+      {
+        type: 'mpegts',
+        isLive: live,
+        url: url,
+      },
+      { lazyLoadMaxDuration: 60 },
+    )
     player.value.attachMediaElement(video.value)
     player.value.on(mpegts.Events.MEDIA_INFO, function (mediaInfo) {
       console.log('Media Info:', mediaInfo)
