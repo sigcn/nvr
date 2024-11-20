@@ -23,15 +23,24 @@ async function signout() {
       <div class="user" @click="slideMenu">
         <span>Administrator</span>
         <ul class="menu" v-if="profileMenu">
-          <li @click="signout"><a href="javascript:;">Sign out</a></li>
+          <li @click="signout">
+            <a href="javascript:;">{{ $t('signin.signout') }}</a>
+          </li>
         </ul>
       </div>
     </div>
     <div class="main">
       <nav>
         <ul>
-          <li><RouterLink to="/cameras">Cameras</RouterLink></li>
-          <li><RouterLink to="/storage">Storage</RouterLink></li>
+          <li>
+            <RouterLink to="/cameras">{{ $t('nav.cameras') }}</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/storage">{{ $t('nav.storage') }}</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/settings">{{ $t('nav.settings') }}</RouterLink>
+          </li>
         </ul>
       </nav>
       <div class="content"><RouterView /></div>

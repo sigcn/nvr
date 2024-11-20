@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue'
 import http from '../http'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const errtips = ref('')
-const btnText = ref('Sign in')
+const btnText = ref(t('signin.signin'))
 const idText = ref('')
 const passwordText = ref('')
 const idInput = ref()
@@ -19,12 +21,12 @@ async function signIn() {
     return
   }
   errtips.value = ''
-  btnText.value = 'Signning in'
+  btnText.value = t('signin.signningin')
   let r = await http.post('/v1/api/keys', {
     body: { id: idText.value, password: passwordText.value },
   })
   console.log(r)
-  btnText.value = 'Sign in'
+  btnText.value = t('signin.signin')
   if (r.code != 0) {
     errtips.value = r.msg
     return
@@ -42,10 +44,10 @@ async function signIn() {
     </div>
     <div class="right-side">
       <div>
-        <h2>Sign in to console</h2>
+        <h2>{{ $t('signin.toconsole') }}</h2>
         <div class="login-form">
           <div>
-            <label>Username</label>
+            <label>{{ $t('signin.username') }}</label>
             <input
               ref="idInput"
               @keydown.enter="signIn"
@@ -55,7 +57,7 @@ async function signIn() {
             />
           </div>
           <div>
-            <label>Password</label>
+            <label>{{ $t('signin.password') }}</label>
             <input
               ref="passwordInput"
               @keydown.enter="signIn"

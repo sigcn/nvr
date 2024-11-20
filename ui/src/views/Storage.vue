@@ -36,9 +36,7 @@ async function loadStat() {
         other
       </div>
       <div class="type free" :style="`flex: ${stat.volume_free};`">
-        free ({{
-          new Number(stat.volume_free / 1024 / 1024 / 1024).toFixed(2)
-        }}
+        free ({{ new Number(stat.volume_free / 1024 / 1024 / 1024).toFixed(2) }}
         GiB)
       </div>
     </div>
