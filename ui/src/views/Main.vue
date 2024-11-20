@@ -31,6 +31,7 @@ async function signout() {
       <nav>
         <ul>
           <li><RouterLink to="/cameras">Cameras</RouterLink></li>
+          <li><RouterLink to="/storage">Storage</RouterLink></li>
         </ul>
       </nav>
       <div class="content"><RouterView /></div>
@@ -103,7 +104,15 @@ async function signout() {
 }
 .main nav ul li {
   font-size: 20px;
-  height: 36px;
+  height: 38px;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
 }
 .main .content {
   flex: 1;

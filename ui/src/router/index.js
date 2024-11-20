@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'camera',
       component: () => import('../views/Camera.vue'),
     },
+    {
+      path: '/storage',
+      name: 'storage',
+      component: () => import('../views/Storage.vue'),
+    },
   ],
 })
 
