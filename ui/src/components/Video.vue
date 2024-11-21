@@ -39,17 +39,14 @@ async function init(src, pos, live) {
   if (mpegts.getFeatureList().mseLivePlayback) {
     let url = `${src}?api_key=${session.key}`
     if (pos) {
-      url = `${url}&pos=${pos}&rate=5242880`
+      url = `${url}&pos=${pos}`
       media.value.pos = pos
     }
-    player.value = mpegts.createPlayer(
-      {
-        type: 'mpegts',
-        isLive: live,
-        url: url,
-      },
-      { lazyLoadMaxDuration: 60 },
-    )
+    player.value = mpegts.createPlayer({
+      type: 'mpegts',
+      isLive: live,
+      url: url,
+    })
     player.value.attachMediaElement(video.value)
     player.value.on(mpegts.Events.MEDIA_INFO, function (mediaInfo) {
       console.log('Media Info:', mediaInfo)
