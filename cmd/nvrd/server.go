@@ -134,6 +134,7 @@ func (s *server) handleMediaMPEGTSWithPos(w http.ResponseWriter, r *http.Request
 
 	rangeHeader := r.Header.Get("Range")
 	if rangeHeader != "" {
+		rangeHeader = strings.TrimPrefix(rangeHeader, "bytes=")
 		ranges := strings.Split(rangeHeader, "-")
 		if len(ranges) != 2 {
 			ErrBadRequest.Wrap(errors.New("invalid range header")).MarshalTo(w)
