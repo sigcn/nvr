@@ -45,6 +45,14 @@ async function loadStat() {
       <span class="legend-item other">Other</span>
       <span class="legend-item free">Free</span>
     </div>
+    <div class="tips">
+      已录制 {{ stat.record_days }} 天，平均每天使用
+      {{
+        new Number(stat.day_bytes / 1024 / 1024 / 1024).toFixed(2)
+      }}
+      GiB，大约还可以录制
+      {{ new Number(stat.volume_free / stat.day_bytes).toFixed(0) }} 天
+    </div>
   </div>
 </template>
 <style scoped>
@@ -62,7 +70,7 @@ async function loadStat() {
 }
 .storage-bar {
   display: flex;
-  height: 80px;
+  height: 60px;
   width: 100%;
   border-radius: 10px;
   overflow: hidden;
@@ -79,15 +87,15 @@ async function loadStat() {
 }
 
 .nvrd {
-  background-color: #007aff; /* iOS蓝色 */
+  background-color: #007aff;
 }
 
 .other {
-  background-color: #ff9500; /* iOS橙色 */
+  background-color: #ff9500;
 }
 
 .free {
-  background-color: #ccc; /* iOS绿色 */
+  background-color: #ccc;
 }
 
 .legend {
@@ -97,12 +105,13 @@ async function loadStat() {
 
 .legend-item {
   display: inline-block;
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   margin-right: 45px;
   vertical-align: middle;
-  text-indent: 28px;
+  text-indent: 25px;
+  font-size: 14px;
 }
 
 .legend-item.nvrd {
@@ -115,5 +124,11 @@ async function loadStat() {
 
 .legend-item.free {
   background-color: #ccc;
+}
+.tips {
+  font-size: 16px;
+  color: orange;
+  margin-top: 50px;
+  line-height: 30px;
 }
 </style>
