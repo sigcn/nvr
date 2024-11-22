@@ -21,6 +21,8 @@ import (
 )
 
 var (
+	version string = "dev"
+
 	storePath string
 	listen    string
 	logLevel  int
@@ -87,6 +89,7 @@ func printVersion(s string) error {
 		return errors.ErrUnsupported
 	}
 	fmt.Println(info.GoVersion)
+	fmt.Println("version\t", version)
 	for _, s := range info.Settings {
 		if s.Key == "vcs.revision" {
 			fmt.Println("commit\t", s.Value)
