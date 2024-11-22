@@ -45,7 +45,7 @@ async function loadStat() {
       <span class="legend-item other">Other</span>
       <span class="legend-item free">Free</span>
     </div>
-    <div class="tips">
+    <div class="tips" v-if="stat.record_days > 2">
       {{
         $t('storage.tips', {
           days: stat.record_days,
