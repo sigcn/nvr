@@ -161,8 +161,8 @@ async function loadCamera() {
     width: 100%;
     border-radius: 0;
   }
-  .filter {
-    width: 100%;
+  .operation {
+    margin-right: 13px;
   }
 }
 </style>
