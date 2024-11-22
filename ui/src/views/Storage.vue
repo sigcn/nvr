@@ -46,12 +46,13 @@ async function loadStat() {
       <span class="legend-item free">Free</span>
     </div>
     <div class="tips">
-      已录制 {{ stat.record_days }} 天，平均每天使用
       {{
-        new Number(stat.day_bytes / 1024 / 1024 / 1024).toFixed(2)
+        $t('storage.tips', {
+          days: stat.record_days,
+          daygib: new Number(stat.day_bytes / 1024 / 1024 / 1024).toFixed(2),
+          days1: new Number(stat.volume_free / stat.day_bytes).toFixed(0),
+        })
       }}
-      GiB，大约还可以录制
-      {{ new Number(stat.volume_free / stat.day_bytes).toFixed(0) }} 天
     </div>
   </div>
 </template>

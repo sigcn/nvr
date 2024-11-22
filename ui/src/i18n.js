@@ -16,6 +16,9 @@ export default {
       settings: 'Settings',
       lang: 'Language',
     },
+    storage: {
+      tips: 'Recorded for {days} days, averaging {daygib} GiB per day. Expected to record for another {days1} days.',
+    },
   },
   zh: {
     signin: {
@@ -30,6 +33,9 @@ export default {
       storage: '存储',
       settings: '设置',
       lang: '语言',
+    },
+    storage: {
+      tips: '已录制 {days} 天，平均每天使用 {daygib} GiB。预计还可以录制 {days1} 天。',
     },
   },
 }
