@@ -78,12 +78,12 @@ func recordStat(storagePath string) (d int, b int, err error) {
 			curBytes += int(stat.Size())
 		}
 	}
-	if dayBytes == nil {
+	if len(dayBytes) < 3 {
 		return
 	}
 	slices.Sort(dayBytes)
 	var dayBytesAll int
-	for _, db := range dayBytes[1:] {
+	for _, db := range dayBytes[2:] {
 		dayBytesAll += db
 	}
 	b = dayBytesAll / (len(dayBytes) - 1)
