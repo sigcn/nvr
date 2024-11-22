@@ -61,9 +61,7 @@ async function saveForm() {
     return
   }
   formOpened.value = false
-  await destroyVideos()
   await loadCameras(session)
-  loadVideos(session)
 }
 
 function openForm() {
