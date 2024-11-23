@@ -16,6 +16,9 @@ export default {
       settings: 'Settings',
       lang: 'Language',
     },
+    cameras: {
+      enter: 'Enter',
+    },
     storage: {
       tips: 'Recorded for {days} days, averaging {daygib} GiB per day. Expected to record for another {days1} days.',
     },
@@ -29,10 +32,13 @@ export default {
       signout: '登出',
     },
     nav: {
-      cameras: '摄像头',
+      cameras: '摄像机',
       storage: '存储',
       settings: '设置',
       lang: '语言',
+    },
+    cameras: {
+      enter: '进入',
     },
     storage: {
       tips: '已录制 {days} 天，平均每天使用 {daygib} GiB。预计还可以录制 {days1} 天。',

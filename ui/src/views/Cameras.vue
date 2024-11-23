@@ -88,7 +88,7 @@ function openForm() {
           <div class="b model" v-if="cam.meta.model">{{ cam.meta.model }}</div>
         </div>
         <div class="enter">
-          <RouterLink :to="`/cameras/${cam.id}`">Enter</RouterLink>
+          <RouterLink :to="`/cameras/${cam.id}`">{{ $t('cameras.enter') }}</RouterLink>
         </div>
       </div>
     </li>
