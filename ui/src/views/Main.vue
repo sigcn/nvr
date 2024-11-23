@@ -1,4 +1,5 @@
 <script setup>
+import IconMenu from '@/components/icons/IconMenu.vue'
 import IconCamera from '@/components/icons/IconCamera.vue'
 import IconSettings from '@/components/icons/IconSettings.vue'
 import IconStorage from '@/components/icons/IconStorage.vue'
@@ -6,6 +7,7 @@ import http from '@/http'
 import { ref } from 'vue'
 
 const profileMenu = ref()
+const nav = ref()
 
 function slideMenu() {
   profileMenu.value = !profileMenu.value
@@ -18,10 +20,25 @@ async function signout() {
   await http.delete('/v1/api/keys', { session: session })
   window.location.reload()
 }
+
+function openNav() {
+  if (window.screen.availWidth > 1024) {
+    return
+  }
+  let navStyle = window.getComputedStyle(nav.value)
+  if (navStyle.visibility == 'hidden') {
+    nav.value.style.visibility = 'visible'
+    nav.value.style.opacity = 0.9
+    return
+  }
+  nav.value.style.visibility = 'hidden'
+  nav.value.style.opacity = 0
+}
 </script>
 <template>
   <div class="container">
     <div class="header">
+      <div class="nav-btn" @click="openNav"><IconMenu /></div>
       <div class="logo">NVR</div>
       <div class="user" @click="slideMenu">
         <span>Administrator</span>
@@ -33,8 +50,8 @@ async function signout() {
       </div>
     </div>
     <div class="main">
-      <nav>
-        <ul>
+      <nav ref="nav" @click="openNav">
+        <ul @click.stop="">
           <li>
             <RouterLink to="/cameras"
               ><IconCamera class="icon" />{{ $t('nav.cameras') }}</RouterLink
@@ -71,6 +88,9 @@ async function signout() {
   height: 36px;
   background-color: #f6f8fa;
   border-bottom: var(--borderWidth-thin) solid #d1d9e0;
+}
+.header .nav-btn {
+  display: none;
 }
 .header .logo {
   width: 136px;
@@ -111,6 +131,7 @@ async function signout() {
 }
 .main nav {
   height: 100%;
+  max-height: calc(100vh - 36px);
   width: 136px;
 }
 .main nav ul {
@@ -147,8 +168,49 @@ async function signout() {
 }
 
 @media screen and (max-width: 1024px) {
-  nav {
-    display: none;
+  .main nav {
+    visibility: hidden;
+    position: absolute;
+    z-index: 100;
+    opacity: 0;
+    width: 100%;
+    transition:
+      opacity 0.5s ease,
+      visibility 0.5s ease;
+  }
+  .main nav ul {
+    background-color: #083f39;
+    width: 136px;
+  }
+  nav a {
+    color: #aaa;
+  }
+  nav a:hover {
+    text-decoration: none;
+  }
+  .main nav ul li .icon {
+    fill: #aaa;
+  }
+  .main nav ul li .router-link-active .icon {
+    fill: #fff;
+  }
+  .router-link-active {
+    color: #fff;
+  }
+  .header .nav-btn {
+    fill: #fff;
+    width: 36px;
+    height: 36px;
+    float: left;
+    margin: 0 -36px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .header .nav-btn svg {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>
