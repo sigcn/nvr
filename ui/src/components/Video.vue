@@ -31,9 +31,15 @@ onBeforeRouteLeave(() => {
   player.value?.destroy()
 })
 
-defineExpose({ init, pause, mute })
+defineExpose({ init, pause, mute, play })
 
 async function init(src, pos, live) {
+  src = src || media.value.src
+  pos = pos || media.value.pos
+  live = live || media.value.live
+  media.value.src = src
+  media.value.pos = pos
+  media.value.live = live
   player.value?.destroy()
   let session = JSON.parse(window.localStorage.getItem('session') || '{}')
   if (mpegts.getFeatureList().mseLivePlayback) {
@@ -101,6 +107,7 @@ async function play() {
     }
   } catch (_) {
     media.value.loading = false
+    init()
     return
   }
   media.value.playing = true

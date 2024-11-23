@@ -3,7 +3,7 @@ import http from '@/http'
 import Calendar from 'vue3-slot-calendar'
 import Video from '@/components/Video.vue'
 import { useRoute } from 'vue-router'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const route = useRoute()
 const filterDay = ref(new Date())
@@ -16,6 +16,11 @@ const video = ref()
 onMounted(() => {
   loadCamera()
   requestVideo()
+  window.addEventListener('keydown', shortcutKey)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', shortcutKey)
 })
 
 async function selectDay(day) {
@@ -67,6 +72,29 @@ async function loadCamera() {
     return
   }
   camera.value = r.data
+}
+
+function shortcutKey(e) {
+  console.log(e)
+  if (e.key == 'ArrowRight') {
+    camera.value.disableTimeUpdate = true
+    currentTime.value += 10
+    requestVideo()
+    return
+  }
+  if (e.key == 'ArrowLeft') {
+    camera.value.disableTimeUpdate = true
+    currentTime.value -= 10
+    if (currentTime.value < 0) {
+      currentTime.value = 0
+    }
+    requestVideo()
+    return
+  }
+  if (e.key == ' ') {
+    video.value.play()
+    return
+  }
 }
 </script>
 
