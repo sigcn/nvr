@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -45,48 +46,68 @@ type Stat struct {
 	DayBytes   int `json:"day_bytes"`
 }
 
-func recordStat(storagePath string) (d int, b int, err error) {
-	month, err := os.ReadDir(filepath.Join(storagePath, "videos"))
+func recordStat(storagePath string) (recordDays int, avgBytes int, err error) {
+	cameras, err := os.ReadDir(filepath.Join(storagePath, "videos"))
 	if err != nil {
 		return
 	}
-	var dayBytes []int
-	for _, m := range month {
-		days, err := os.ReadDir(filepath.Join(storagePath, "videos", m.Name()))
+
+	cameraAvg := func(videoPath string) (d int, b int, err error) {
+		month, err := os.ReadDir(videoPath)
 		if err != nil {
-			return 0, 0, err
+			return
 		}
-		var curDay int
-		var curBytes int
-		for _, day := range days {
-			t, err := time.Parse("02_15-04-05.ts", day.Name())
+		var dayBytes []int
+		for _, m := range month {
+			days, err := os.ReadDir(filepath.Join(videoPath, m.Name()))
 			if err != nil {
-				continue
+				return 0, 0, err
 			}
-			if t.Day() != curDay {
-				curDay = t.Day()
-				d += 1
-				if curBytes > 0 {
-					dayBytes = append(dayBytes, curBytes)
-					curBytes = 0
+			var curDay int
+			var curBytes int
+			for _, day := range days {
+				t, err := time.Parse("02_15-04-05.ts", day.Name())
+				if err != nil {
+					continue
 				}
+				if t.Day() != curDay {
+					curDay = t.Day()
+					d += 1
+					if curBytes > 0 {
+						dayBytes = append(dayBytes, curBytes)
+						curBytes = 0
+					}
+				}
+				stat, err := os.Stat(filepath.Join(videoPath, m.Name(), day.Name()))
+				if err != nil {
+					continue
+				}
+				curBytes += int(stat.Size())
 			}
-			stat, err := os.Stat(filepath.Join(storagePath, "videos", m.Name(), day.Name()))
-			if err != nil {
-				continue
-			}
-			curBytes += int(stat.Size())
 		}
-	}
-	if len(dayBytes) < 3 {
+		if len(dayBytes) < 3 {
+			return
+		}
+		slices.Sort(dayBytes)
+		var dayBytesAll int
+		for _, db := range dayBytes[2:] {
+			dayBytesAll += db
+		}
+		b = dayBytesAll / (len(dayBytes) - 1)
 		return
 	}
-	slices.Sort(dayBytes)
-	var dayBytesAll int
-	for _, db := range dayBytes[2:] {
-		dayBytesAll += db
+
+	for _, cam := range cameras {
+		days, bytes, err := cameraAvg(filepath.Join(storagePath, "videos", cam.Name()))
+		if err != nil {
+			slog.Error("Calc camera avg", "camera", cam.Name(), "err", err)
+			continue
+		}
+		if days > recordDays {
+			recordDays = days
+		}
+		avgBytes += bytes
 	}
-	b = dayBytesAll / (len(dayBytes) - 1)
 	return
 }
 

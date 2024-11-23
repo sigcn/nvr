@@ -314,7 +314,7 @@ func reloadCameras(cameraStore camera.Store, recorderManager *recorder.Manager) 
 			slog.Error("Boot", "op", "get stream url", "err", err)
 			continue
 		}
-		if err := recorderManager.Add(cam.ID(), streamURL, filepath.Join(storePath, "videos")); err != nil {
+		if err := recorderManager.Add(cam.ID(), streamURL, filepath.Join(storePath, "videos", cam.ID())); err != nil {
 			slog.Error("Boot", "op", "add", "err", err)
 		}
 	}
