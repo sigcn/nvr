@@ -189,6 +189,9 @@ function shortcutKey(e) {
     width: 100%;
     border-radius: 0;
   }
+  .timeline {
+    margin: 5px;
+  }
   .operation {
     margin-right: 13px;
   }

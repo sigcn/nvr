@@ -25,6 +25,9 @@ onMounted(async () => {
   if (props.src) {
     init(props.src, undefined, props.live)
   }
+  video.value.addEventListener('pause', () => {
+    media.value.playing = false
+  })
 })
 
 onBeforeRouteLeave(() => {
@@ -125,7 +128,13 @@ async function pause() {
 }
 
 function fullscreen() {
-  video.value.requestFullscreen()
+  if (video.value.requestFullscreen) {
+    video.value.requestFullscreen()
+  } else if (video.value.webkitEnterFullScreen) {
+    video.value.webkitEnterFullScreen()
+  } else {
+    alert('unsupport')
+  }
   video.value.style.pointerEvents = 'none'
 }
 
@@ -146,6 +155,7 @@ function timeupdate(e) {
       ref="video"
       :style="`display: ${media.playing ? 'block' : 'none'}`"
       @timeupdate="timeupdate"
+      playsinline
     ></video>
     <div class="ops" v-if="media.showmenu || !media.playing">
       <div class="play" @click="play">
@@ -221,5 +231,19 @@ video,
   justify-content: center;
   align-items: center;
   background-color: #333;
+}
+
+@media screen and (max-width: 1024px) {
+  .ops {
+    height: 36px;
+  }
+  .ops svg {
+    width: 18px;
+    height: 18px;
+  }
+  .play svg {
+    width: 28px;
+    height: 28px;
+  }
 }
 </style>
