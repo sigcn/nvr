@@ -1,4 +1,7 @@
 <script setup>
+import IconCamera from '@/components/icons/IconCamera.vue'
+import IconSettings from '@/components/icons/IconSettings.vue'
+import IconStorage from '@/components/icons/IconStorage.vue'
 import http from '@/http'
 import { ref } from 'vue'
 
@@ -33,13 +36,19 @@ async function signout() {
       <nav>
         <ul>
           <li>
-            <RouterLink to="/cameras">{{ $t('nav.cameras') }}</RouterLink>
+            <RouterLink to="/cameras"
+              ><IconCamera class="icon" />{{ $t('nav.cameras') }}</RouterLink
+            >
           </li>
           <li>
-            <RouterLink to="/storage">{{ $t('nav.storage') }}</RouterLink>
+            <RouterLink to="/storage"
+              ><IconStorage class="icon" />{{ $t('nav.storage') }}</RouterLink
+            >
           </li>
           <li>
-            <RouterLink to="/settings">{{ $t('nav.settings') }}</RouterLink>
+            <RouterLink to="/settings"
+              ><IconSettings class="icon" />{{ $t('nav.settings') }}</RouterLink
+            >
           </li>
         </ul>
       </nav>
@@ -123,6 +132,14 @@ async function signout() {
     Liberation Mono,
     monospace;
 }
+.main nav ul li .icon {
+  width: 22px;
+  height: 22px;
+  float: left;
+  margin-top: 4px;
+  margin-right: 2px;
+  fill: #2e90a0;
+}
 .main .content {
   flex: 1;
   max-height: calc(100vh - 36px);
@@ -133,5 +150,15 @@ async function signout() {
   nav {
     display: none;
   }
+}
+</style>
+
+<style>
+.router-link-active {
+  color: #000;
+}
+
+.main nav ul li .router-link-active .icon {
+  fill: #000;
 }
 </style>

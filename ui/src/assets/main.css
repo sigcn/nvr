@@ -22,10 +22,6 @@ a:hover {
   text-decoration: underline;
 }
 
-.router-link-active {
-  color: #000;
-}
-
 .mainbtn {
   display: inline-block;
   width: 60px;
