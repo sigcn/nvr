@@ -20,30 +20,48 @@ async function loadStat() {
 </script>
 <template>
   <div class="container">
-    <div class="storage">{{ stat.volume_path || 'loadding' }}</div>
-
-    <div class="storage-bar">
-      <div class="type nvrd" :style="`flex: ${stat.volume_usage};`">
-        nvrd ({{
-          new Number(stat.volume_usage / 1024 / 1024 / 1024).toFixed(2)
-        }}
-        GiB)
+    <div class="stat">
+      <div class="storage">
+        <div class="path">
+          {{ stat.volume_path || 'loadding' }}
+        </div>
+        <div class="usage">
+          {{
+            new Number(
+              (stat.volume_total - stat.volume_free) / 1024 / 1024 / 1024,
+            ).toFixed(2)
+          }}
+          GiB/{{
+            new Number(stat.volume_total / 1024 / 1024 / 1024).toFixed(2)
+          }}
+          GiB
+        </div>
       </div>
-      <div
-        class="type other"
-        :style="`flex: ${stat.volume_total - stat.volume_free - stat.volume_usage};`"
-      >
-        other
+      <div class="storage-bar">
+        <div class="type nvrd" :style="`flex: ${stat.volume_usage};`">
+          nvrd ({{
+            new Number(stat.volume_usage / 1024 / 1024 / 1024).toFixed(2)
+          }}
+          GiB)
+        </div>
+        <div
+          class="type other"
+          :style="`flex: ${stat.volume_total - stat.volume_free - stat.volume_usage};`"
+        >
+          other
+        </div>
+        <div class="type free" :style="`flex: ${stat.volume_free || 1};`">
+          free ({{
+            new Number(stat.volume_free / 1024 / 1024 / 1024).toFixed(2)
+          }}
+          GiB)
+        </div>
       </div>
-      <div class="type free" :style="`flex: ${stat.volume_free};`">
-        free ({{ new Number(stat.volume_free / 1024 / 1024 / 1024).toFixed(2) }}
-        GiB)
+      <div class="legend">
+        <span class="legend-item nvrd">NVRD</span>
+        <span class="legend-item other">Other</span>
+        <span class="legend-item free">Free</span>
       </div>
-    </div>
-    <div class="legend">
-      <span class="legend-item nvrd">NVRD</span>
-      <span class="legend-item other">Other</span>
-      <span class="legend-item free">Free</span>
     </div>
     <div class="tips" v-if="stat.record_days > 2">
       {{
@@ -58,27 +76,47 @@ async function loadStat() {
 </template>
 <style scoped>
 .container {
-  padding: 20px;
+  padding: 10px;
   width: 100%;
   height: fit-content;
 }
+.stat {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 10px;
+}
 .storage {
-  font-size: 30px;
-  height: 30px;
-  line-height: 30px;
-  margin: 20px 0 40px 0;
+  height: 50px;
+  line-height: 25px;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+}
+.storage .path {
+  font-size: 26px;
   font-weight: bold;
+  flex: 1;
+  overflow-wrap: break-word;
+  overflow: hidden;
+}
+.storage .usage {
+  color: #999;
+  font-size: 16px;
 }
 .storage-bar {
   display: flex;
-  height: 60px;
+  height: 36px;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 3px;
   overflow: hidden;
   margin-bottom: 20px;
+  font-size: 12px;
+  line-height: 12px;
 }
 
 .type {
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,7 +126,7 @@ async function loadStat() {
 }
 
 .nvrd {
-  background-color: #007aff;
+  background-color: #db1037;
 }
 
 .other {
@@ -106,17 +144,18 @@ async function loadStat() {
 
 .legend-item {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   margin-right: 45px;
   vertical-align: middle;
-  text-indent: 25px;
+  text-indent: 20px;
+  line-height: 15px;
   font-size: 14px;
 }
 
 .legend-item.nvrd {
-  background-color: #007aff;
+  background-color: #db1037;
 }
 
 .legend-item.other {
@@ -129,7 +168,13 @@ async function loadStat() {
 .tips {
   font-size: 16px;
   color: orange;
-  margin-top: 50px;
+  margin-top: 36px;
   line-height: 30px;
+}
+@media screen and (max-width: 1024px) {
+  .stat {
+    padding: 20px 10px;
+    border-radius: 5px;
+  }
 }
 </style>
