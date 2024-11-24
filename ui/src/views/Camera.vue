@@ -12,6 +12,7 @@ const lastPlayOffet = ref(0)
 const currentTime = ref(0)
 const camera = ref({})
 const video = ref()
+const progress = ref()
 
 onMounted(() => {
   loadCamera()
@@ -114,6 +115,18 @@ function shortcutKey(e) {
     return
   }
 }
+const showprogress = e => {
+  console.log(e, progress.value.getBoundingClientRect().width)
+  camera.value.progress = formatTime(
+    ((24 * 3600) / progress.value.getBoundingClientRect().width) * e.offsetX,
+  )
+}
+
+const disableArrowKeys = event => {
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+    event.preventDefault()
+  }
+}
 </script>
 
 <template>
@@ -124,6 +137,7 @@ function shortcutKey(e) {
       </div>
       <div class="timeline">
         <input
+          ref="progress"
           class="progress"
           type="range"
           min="0"
@@ -131,7 +145,10 @@ function shortcutKey(e) {
           step="1"
           v-model="currentTime"
           @input="camera.disableTimeUpdate = true"
+          @mousemove="showprogress"
           @change="requestVideo"
+          @keydown="disableArrowKeys"
+          :title="`${camera.progress}`"
         />
         <div class="timer">{{ formatTime(currentTime) }}</div>
         <div class="op">
