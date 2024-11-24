@@ -22,6 +22,9 @@ export default {
     storage: {
       tips: 'Recorded for {days} days, averaging {daygib} GiB per day. Expected to record for another {days1} days.',
     },
+    settings: {
+      camerasHideAdd: 'Hide the add button on the cameras page'
+    }
   },
   zh: {
     signin: {
@@ -43,5 +46,8 @@ export default {
     storage: {
       tips: '已录制 {days} 天，平均每天使用 {daygib} GiB。预计还可以录制 {days1} 天。',
     },
+    settings: {
+      camerasHideAdd: '隐藏添加摄像机按钮'
+    }
   },
 }

@@ -14,8 +14,10 @@ const usernameRef = ref()
 const passwordRef = ref()
 const saveBtnText = ref('Save')
 const errTips = ref('')
+const settingsCamerasHideAdd = ref()
 
 onMounted(async () => {
+  settingsCamerasHideAdd.value = JSON.parse(window.localStorage.camerasHideAdd)
   let sessionVal = window.localStorage.getItem('session')
   let session = JSON.parse(sessionVal)
   await loadCameras(session)
@@ -94,7 +96,7 @@ function openForm() {
         </div>
       </div>
     </li>
-    <li>
+    <li v-if="!settingsCamerasHideAdd">
       <div class="addArea" v-if="!formOpened" @click="openForm">
         <IconAdd class="add" />
       </div>
