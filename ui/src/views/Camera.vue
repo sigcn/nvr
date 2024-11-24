@@ -88,21 +88,25 @@ async function loadCamera() {
   camera.value = r.data
 }
 
+const seekProgress = v => {
+  camera.value.disableTimeUpdate = true
+  currentTime.value += v
+  if (currentTime.value < 0) {
+    currentTime.value = 0
+  } else if (currentTime.value > 24 * 3600) {
+    currentTime.value = 24 * 3600
+  }
+  requestVideo()
+}
+
 function shortcutKey(e) {
   console.log(e)
   if (e.key == 'ArrowRight') {
-    camera.value.disableTimeUpdate = true
-    currentTime.value += 10
-    requestVideo()
+    seekProgress(15)
     return
   }
   if (e.key == 'ArrowLeft') {
-    camera.value.disableTimeUpdate = true
-    currentTime.value -= 10
-    if (currentTime.value < 0) {
-      currentTime.value = 0
-    }
-    requestVideo()
+    seekProgress(-15)
     return
   }
   if (e.key == ' ') {
@@ -129,7 +133,11 @@ function shortcutKey(e) {
           @input="camera.disableTimeUpdate = true"
           @change="requestVideo"
         />
-        <div class="">{{ formatTime(currentTime) }}</div>
+        <div class="timer">{{ formatTime(currentTime) }}</div>
+        <div class="op">
+          <a href="javascript:;" @click="seekProgress(-15)">-15s</a>
+          <a href="javascript:;" @click="seekProgress(15)">+15s</a>
+        </div>
       </div>
     </div>
     <div class="operation">
@@ -172,6 +180,17 @@ function shortcutKey(e) {
 .videoArea .progress {
   width: 100%;
 }
+
+.timeline .timer {
+  display: inline-block;
+  margin-right: 10px;
+}
+.timeline .op {
+  float: right;
+}
+.timeline .op a {
+  margin-left: 10px;
+}
 .operation {
   padding: 0 0 0 10px;
 }
@@ -204,7 +223,7 @@ function shortcutKey(e) {
     border-radius: 0;
   }
   .timeline {
-    margin: 5px;
+    margin: 5px 10px;
   }
   .operation {
     margin-right: 10px;
