@@ -15,6 +15,7 @@ const video = ref()
 
 onMounted(() => {
   loadCamera()
+  prepareVideo()
   requestVideo()
   window.addEventListener('keydown', shortcutKey)
 })
@@ -22,6 +23,19 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', shortcutKey)
 })
+
+const prepareVideo = () => {
+  if (route.query.pos) {
+    let posDate = new Date(new Number(route.query.pos) * 1000)
+    let dayDate = new Date(
+      posDate.getFullYear(),
+      posDate.getMonth(),
+      posDate.getDate(),
+    )
+    filterDay.value = dayDate
+    currentTime.value = Math.floor((posDate - dayDate) / 1000)
+  }
+}
 
 async function selectDay(day) {
   filterDay.value = day
