@@ -143,11 +143,27 @@ function timeupdate(e) {
     emit('timeupdate', { event: e, currentTime: video.value?.currentTime })
   }, 1000)()
 }
+
+let hidemenuTimter = null
+const showmenu = () => {
+  if (window.screen.availWidth > 1024) {
+    return
+  }
+  if (hidemenuTimter) {
+    clearTimeout(hidemenuTimter)
+  }
+  media.value.showmenu = true
+  hidemenuTimter = setTimeout(() => {
+    media.value.showmenu = false
+    hidemenuTimter = null
+  }, 2000)
+}
 </script>
 <template>
   <div
     @mouseenter="media.showmenu = true"
     @mouseleave="media.showmenu = false"
+    @click="showmenu"
     class="container"
   >
     <div class="bg" v-if="!media.playing">no video signal</div>
