@@ -93,7 +93,7 @@ function openNav() {
   display: none;
 }
 .header .logo {
-  width: 136px;
+  width: 139px;
   height: 36px;
   line-height: 36px;
   background-color: #083f39;
@@ -106,7 +106,7 @@ function openNav() {
   float: right;
   height: 40px;
   line-height: 40px;
-  margin: -38px 10px 0 0;
+  margin: -38px 0 0 0;
   width: 100px;
   z-index: 10000;
   position: relative;
@@ -132,7 +132,7 @@ function openNav() {
 .main nav {
   height: 100%;
   max-height: calc(100vh - 36px);
-  width: 136px;
+  width: 139px;
 }
 .main nav ul {
   height: 100%;
@@ -180,7 +180,7 @@ function openNav() {
   }
   .main nav ul {
     background-color: #083f39;
-    width: 136px;
+    width: 139px;
   }
   nav a {
     color: #aaa;
@@ -202,7 +202,7 @@ function openNav() {
     width: 36px;
     height: 36px;
     float: left;
-    margin: 0 -36px 0 0;
+    margin: 0 -37px 0 1px;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -159,7 +159,7 @@ function shortcutKey(e) {
   width: 100%;
 }
 .operation {
-  padding: 0 0 0 13px;
+  padding: 0 0 0 10px;
 }
 
 .camera {
@@ -193,7 +193,7 @@ function shortcutKey(e) {
     margin: 5px;
   }
   .operation {
-    margin-right: 13px;
+    margin-right: 10px;
   }
 }
 </style>
