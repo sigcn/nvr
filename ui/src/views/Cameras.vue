@@ -17,7 +17,9 @@ const errTips = ref('')
 const settingsCamerasHideAdd = ref()
 
 onMounted(async () => {
-  settingsCamerasHideAdd.value = JSON.parse(window.localStorage.camerasHideAdd)
+  settingsCamerasHideAdd.value = JSON.parse(
+    window.localStorage.camerasHideAdd || false,
+  )
   let sessionVal = window.localStorage.getItem('session')
   let session = JSON.parse(sessionVal)
   await loadCameras(session)
