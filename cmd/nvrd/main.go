@@ -1,14 +1,12 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -66,6 +64,7 @@ func main() {
 	mux.HandleFunc("PATCH  /v1/api/cameras/{camera_id}/remark", httpserver.handleUpdateCameraRemark)
 	mux.HandleFunc("POST   /v1/api/cameras/reload", httpserver.handleReloadCameras)
 	mux.HandleFunc("GET    /v1/api/stat", handleStat)
+	mux.HandleFunc("GET    /v1/api/settings", handleQuerySettings)
 	mux.HandleFunc("GET    /", handleStaticFiles)
 
 	if err := http.ListenAndServe(listen, corsMiddleware(httpserver.middlewareApiKey(mux))); err != nil {
@@ -84,21 +83,14 @@ func handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 }
 
 func printVersion(s string) error {
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		return errors.ErrUnsupported
+	info, err := readBuildInfo()
+	if err != nil {
+		return err
 	}
 	fmt.Println(info.GoVersion)
 	fmt.Println("version\t", version)
-	for _, s := range info.Settings {
-		if s.Key == "vcs.revision" {
-			fmt.Println("commit\t", s.Value)
-			continue
-		}
-		if s.Key == "vcs.time" {
-			fmt.Println("time\t", s.Value)
-		}
-	}
+	fmt.Println("commit\t", info.VCSRevision)
+	fmt.Println("time\t", info.VCSTime)
 	os.Exit(0)
 	return nil
 }
