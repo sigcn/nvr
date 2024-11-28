@@ -23,7 +23,10 @@ export default {
       tips: 'Recorded for {days} days, averaging {daygib} GiB per day. Expected to record for another {days1} days.',
     },
     settings: {
-      camerasHideAdd: 'Hide the add button on the cameras page'
+      camerasHideAdd: 'Hide the add button on the cameras page',
+      go_version: "GoVersion",
+      version: "ProgramVersion",
+      build_info: "BuildInfo"
     }
   },
   zh: {
@@ -47,7 +50,10 @@ export default {
       tips: '已录制 {days} 天，平均每天使用 {daygib} GiB。预计还可以录制 {days1} 天。',
     },
     settings: {
-      camerasHideAdd: '隐藏添加摄像机按钮'
+      camerasHideAdd: '隐藏添加摄像机按钮',
+      go_version: "Go版本",
+      version: "程序版本",
+      build_info: "构建信息"
     }
   },
 }

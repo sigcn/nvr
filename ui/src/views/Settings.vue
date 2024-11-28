@@ -1,12 +1,15 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import http from '@/http'
 
 const { locale } = useI18n()
 const camerasHideAdd = ref()
+const settings = ref({})
 
 onMounted(() => {
   camerasHideAdd.value = window.localStorage.getItem('camerasHideAdd')
+  loadSettings()
 })
 
 watch(locale, lang => {
@@ -16,6 +19,17 @@ watch(locale, lang => {
 watch(camerasHideAdd, val => {
   window.localStorage.setItem('camerasHideAdd', val)
 })
+
+const loadSettings = async () => {
+  let session = JSON.parse(window.localStorage.getItem('session'))
+  let r = await http.get(`/v1/api/settings`, {
+    session: session,
+  })
+  if (r.code != 0) {
+    return
+  }
+  settings.value = r.data
+}
 </script>
 <template>
   <div class="language">
@@ -31,6 +45,20 @@ watch(camerasHideAdd, val => {
     <div class="line custom-checkbox">
       <input v-model="camerasHideAdd" type="checkbox" id="checkbox" />
       <label for="checkbox">{{ $t('settings.camerasHideAdd') }}</label>
+    </div>
+    <div class="line">
+      <div class="key">{{ $t('settings.go_version') }}</div>
+      <div class="value">{{ settings.go_version }}</div>
+    </div>
+    <div class="line">
+      <div class="key">{{ $t('settings.version') }}</div>
+      <div class="value">{{ settings.version }}</div>
+    </div>
+    <div class="line">
+      <div class="key">{{ $t('settings.build_info') }}</div>
+      <div class="value">
+        {{ settings.vcs_revision }} {{ settings.vcs_time }}
+      </div>
     </div>
   </div>
 </template>
