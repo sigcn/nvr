@@ -90,6 +90,9 @@ func (s *SimpleApiKeyStore) Verify(apiKey string) (*User, error) {
 func (s *SimpleApiKeyStore) Load() error {
 	s.init()
 	f, err := os.Open(filepath.Join(s.Path, "api-keys.json"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
