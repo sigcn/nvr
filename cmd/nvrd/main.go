@@ -67,6 +67,7 @@ func main() {
 	mux.HandleFunc("GET    /v1/api/settings", handleQuerySettings)
 	mux.HandleFunc("GET    /", handleStaticFiles)
 
+	slog.Info("Serving", "addr", listen)
 	if err := http.ListenAndServe(listen, corsMiddleware(httpserver.middlewareApiKey(mux))); err != nil {
 		panic(err)
 	}
