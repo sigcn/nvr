@@ -4,6 +4,10 @@ import Calendar from 'vue3-slot-calendar'
 import Video from '@/components/Video.vue'
 import { useRoute } from 'vue-router'
 import { onMounted, onUnmounted, ref } from 'vue'
+import IconLeft from '@/components/icons/IconLeft.vue'
+import IconTop from '@/components/icons/IconTop.vue'
+import IconRight from '@/components/icons/IconRight.vue'
+import IconDown from '@/components/icons/IconDown.vue'
 
 const route = useRoute()
 const filterDay = ref(new Date())
@@ -13,6 +17,9 @@ const currentTime = ref(0)
 const camera = ref({})
 const video = ref()
 const progress = ref()
+const live = ref(true)
+const toLiveTab = ref()
+const toSeekTab = ref()
 
 onMounted(() => {
   loadCamera()
@@ -22,7 +29,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', shortcutKey)
+  window.removeEventListener('key ref="moveLeft" down', shortcutKey)
 })
 
 const prepareVideo = () => {
@@ -52,7 +59,10 @@ async function requestVideo() {
   selectDate.setHours(0, 0, 0, 0)
   let pos = Math.floor(selectDate.getTime() / 1000) + Number(currentTime.value)
   let src = `${http.apiServer}/media/${route.params.id}/live.ts`
-  video.value.init(src, pos)
+  if (live.value) {
+    pos = null
+  }
+  video.value.init(src, pos, live.value)
 }
 
 function formatTime(time) {
@@ -64,7 +74,7 @@ function formatTime(time) {
 
 function updateProgress(e) {
   let newTime = Number(lastPlayOffet.value) + Math.floor(e.currentTime)
-  if (camera.value.disableTimeUpdate) {
+  if (camera.value && camera.value.disableTimeUpdate) {
     return
   }
   currentTime.value = newTime
@@ -115,6 +125,19 @@ function shortcutKey(e) {
     return
   }
 }
+
+const moveCamera = async (x, y) => {
+  let session = JSON.parse(window.localStorage.getItem('session'))
+  let r = await http.post(`/v1/api/cameras/${route.params.id}/move`, {
+    session: session,
+    body: {
+      x: x,
+      y: y,
+    },
+  })
+  console.log(r)
+}
+
 const showprogress = e => {
   console.log(e, progress.value.getBoundingClientRect().width)
   camera.value.progress = formatTime(
@@ -127,6 +150,25 @@ const disableArrowKeys = event => {
     event.preventDefault()
   }
 }
+
+const toLive = e => {
+  if (live.value) {
+    return
+  }
+  toLiveTab.value.classList.add('selected')
+  toSeekTab.value.classList.remove('selected')
+  live.value = true
+  requestVideo()
+}
+const toSeek = e => {
+  if (!live.value) {
+    return
+  }
+  toLiveTab.value.classList.remove('selected')
+  toSeekTab.value.classList.add('selected')
+  live.value = false
+  requestVideo()
+}
 </script>
 
 <template>
@@ -135,7 +177,7 @@ const disableArrowKeys = event => {
       <div class="video">
         <Video ref="video" @timeupdate="updateProgress"></Video>
       </div>
-      <div class="timeline">
+      <div class="timeline" v-if="!live">
         <input
           ref="progress"
           class="progress"
@@ -171,7 +213,46 @@ const disableArrowKeys = event => {
           {{ camera.meta ? camera.meta.model : 'loading' }}
         </div>
       </div>
+      <div class="change-mode">
+        <div class="tab tab1 selected" @click="toLive" ref="toLiveTab">
+          Live
+        </div>
+        <div class="tab tab2" @click="toSeek" ref="toSeekTab">Seek</div>
+      </div>
+      <div v-if="live" class="ptz">
+        <div class="btns">
+          <div
+            class="btn"
+            @click="moveCamera(-0.1, 0)"
+            style="left: 0; top: 60px"
+          >
+            <IconLeft />
+          </div>
+          <div
+            class="btn"
+            @click="moveCamera(0, 0.2)"
+            style="left: 60px; top: 0px"
+          >
+            <IconTop />
+          </div>
+          <div
+            class="btn"
+            @click="moveCamera(0.1, 0)"
+            style="right: 0; top: 60px"
+          >
+            <IconRight />
+          </div>
+          <div
+            class="btn"
+            @click="moveCamera(0, -0.2)"
+            style="right: 60px; bottom: 0px"
+          >
+            <IconDown />
+          </div>
+        </div>
+      </div>
       <Calendar
+        v-else
         v-model="filterDay"
         :has-input="false"
         @day-click="selectDay"
@@ -229,6 +310,62 @@ const disableArrowKeys = event => {
   font-size: 13px;
   color: darkslategray;
 }
+.change-mode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+  line-height: 32px;
+  margin-bottom: 10px;
+}
+.change-mode .tab {
+  height: 32px;
+  line-height: 32px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  background-color: #d1d9e0;
+  user-select: none;
+}
+.change-mode .tab1 {
+  border-radius: 5px 0 0 5px;
+}
+.change-mode .tab2 {
+  border-radius: 0 5px 5px 0;
+}
+.change-mode .selected {
+  background-color: #083f39;
+  color: #fff;
+}
+.ptz {
+  width: 247px;
+  display: flex;
+  justify-content: center;
+}
+.ptz .btns {
+  display: block;
+  margin-top: 20px;
+  width: 180px;
+  height: 180px;
+  position: absolute;
+}
+.ptz .btns .btn {
+  display: flex;
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+}
+.ptz .btns .btn:hover {
+  background-color: #d1d9e0;
+}
+.ptz .btns .btn svg {
+  width: 32px;
+  height: 32px;
+}
 @media screen and (max-width: 1024px) {
   .cameraContainer {
     padding: 0px 0 0 0;
@@ -244,6 +381,9 @@ const disableArrowKeys = event => {
   }
   .operation {
     margin-right: 10px;
+  }
+  .ptz {
+    margin: 0 auto;
   }
 }
 </style>

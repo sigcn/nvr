@@ -24,10 +24,10 @@ export default {
     },
     settings: {
       camerasHideAdd: 'Hide the add button on the cameras page',
-      go_version: "GoVersion",
-      version: "ProgramVersion",
-      build_info: "BuildInfo"
-    }
+      go_version: 'GoVersion',
+      version: 'ProgramVersion',
+      build_info: 'BuildInfo',
+    },
   },
   zh: {
     signin: {
@@ -51,9 +51,9 @@ export default {
     },
     settings: {
       camerasHideAdd: '隐藏添加摄像机按钮',
-      go_version: "Go版本",
-      version: "程序版本",
-      build_info: "构建信息"
-    }
+      go_version: 'Go版本',
+      version: '程序版本',
+      build_info: '构建信息',
+    },
   },
 }

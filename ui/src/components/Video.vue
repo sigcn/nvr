@@ -37,6 +37,7 @@ onBeforeRouteLeave(() => {
 defineExpose({ init, pause, mute, play })
 
 async function init(src, pos, live) {
+  media.value = {}
   src = src || media.value.src
   pos = pos || media.value.pos
   live = live || media.value.live
