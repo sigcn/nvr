@@ -29,7 +29,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('key ref="moveLeft" down', shortcutKey)
+  window.removeEventListener('keydown', shortcutKey)
 })
 
 const prepareVideo = () => {
