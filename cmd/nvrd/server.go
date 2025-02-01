@@ -36,6 +36,11 @@ type ListCamera struct {
 	Meta   camera.Meta `json:"meta"`
 }
 
+type MoveCamera struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+}
+
 type UpdateRemark struct {
 	Remark string `json:"remark"`
 }
@@ -247,6 +252,30 @@ func (s *server) handleUpdateCameraRemark(w http.ResponseWriter, r *http.Request
 		return
 	}
 	Ok(nil).MarshalTo(w)
+}
+
+func (s *server) handleMoveCamera(w http.ResponseWriter, r *http.Request) {
+	var req MoveCamera
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		ErrBadRequest.Wrap(err).MarshalTo(w)
+		return
+	}
+	cameraID := r.PathValue("camera_id")
+
+	cam, err := s.cameraStore.Get(cameraID)
+	if err != nil {
+		Err(err).MarshalTo(w)
+		return
+	}
+	if onvifCam, ok := cam.(*camera.ONVIFCamera); ok {
+		if err := onvifCam.Move(req.X, req.Y); err != nil {
+			Err(err).MarshalTo(w)
+			return
+		}
+		Ok(nil).MarshalTo(w)
+		return
+	}
+	ErrNoMoveFeature.MarshalTo(w)
 }
 
 func (s *server) handleReloadCameras(w http.ResponseWriter, r *http.Request) {

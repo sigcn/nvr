@@ -33,7 +33,7 @@ func (s *FileStore) Get(id string) (Camera, error) {
 	defer f.Close()
 	var cam ONVIFCamera
 	json.NewDecoder(f).Decode(&cam)
-	return &cam, nil
+	return &cam, cam.init()
 }
 
 func (s *FileStore) List() ([]Camera, error) {

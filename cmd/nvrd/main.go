@@ -62,6 +62,7 @@ func main() {
 	mux.HandleFunc("GET    /v1/api/cameras/{camera_id}", httpserver.handleGetCamera)
 	mux.HandleFunc("DELETE /v1/api/cameras/{camera_id}", httpserver.handleDeleteCamera)
 	mux.HandleFunc("PATCH  /v1/api/cameras/{camera_id}/remark", httpserver.handleUpdateCameraRemark)
+	mux.HandleFunc("POST   /v1/api/cameras/{camera_id}/move", httpserver.handleMoveCamera)
 	mux.HandleFunc("POST   /v1/api/cameras/reload", httpserver.handleReloadCameras)
 	mux.HandleFunc("GET    /v1/api/stat", handleStat)
 	mux.HandleFunc("GET    /v1/api/settings", handleQuerySettings)

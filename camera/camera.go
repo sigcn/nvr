@@ -9,6 +9,7 @@ import (
 	"github.com/use-go/onvif"
 	"github.com/use-go/onvif/device"
 	"github.com/use-go/onvif/media"
+	"github.com/use-go/onvif/ptz"
 	sdkdevice "github.com/use-go/onvif/sdk/device"
 	sdkmedia "github.com/use-go/onvif/sdk/media"
 	xsdonvif "github.com/use-go/onvif/xsd/onvif"
@@ -121,4 +122,20 @@ func (cam *ONVIFCamera) StreamURL() (string, error) {
 
 func (cam *ONVIFCamera) Meta() Meta {
 	return cam.Metadata
+}
+
+func (cam *ONVIFCamera) Move(x, y float64) error {
+	if cam.profiles == nil {
+		return errors.New("offline")
+	}
+
+	relativeMoveRequest := ptz.RelativeMove{
+		ProfileToken: cam.profiles[0].Token,
+		Translation: xsdonvif.PTZVector{
+			PanTilt: xsdonvif.Vector2D{X: x, Y: y},
+		},
+	}
+
+	_, err := cam.device.CallMethod(relativeMoveRequest)
+	return err
 }

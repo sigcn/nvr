@@ -18,7 +18,9 @@ func (o Data) MarshalTo(w io.Writer) error {
 }
 
 var (
-	ErrBadRequest errdefs.Error = errdefs.Error{Code: 400, Msg: "bad request"}
+	ErrBadRequest     errdefs.Error = errdefs.Error{Code: 400, Msg: "bad request"}
+	ErrNotONVIFDevice errdefs.Error = errdefs.Error{Code: 10000, Msg: "not onvif device"}
+	ErrNoMoveFeature  errdefs.Error = errdefs.Error{Code: 10001, Msg: "no move feature"}
 )
 
 func Err(err error) errdefs.Error {
