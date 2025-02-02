@@ -58,13 +58,13 @@ func recordStat(storagePath string) (recordDays int, avgBytes int, err error) {
 			return
 		}
 		var dayBytes []int
+		var curDay int
+		var curBytes int
 		for _, m := range month {
 			days, err := os.ReadDir(filepath.Join(videoPath, m.Name()))
 			if err != nil {
 				return 0, 0, err
 			}
-			var curDay int
-			var curBytes int
 			for _, day := range days {
 				t, err := time.Parse("02_15-04-05.ts", day.Name())
 				if err != nil {
@@ -84,6 +84,9 @@ func recordStat(storagePath string) (recordDays int, avgBytes int, err error) {
 				}
 				curBytes += int(stat.Size())
 			}
+		}
+		if curBytes > 0 {
+			dayBytes = append(dayBytes, curBytes)
 		}
 		if len(dayBytes) < 3 {
 			return
