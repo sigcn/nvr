@@ -18,6 +18,8 @@ export default {
     },
     cameras: {
       enter: 'Enter',
+      live: 'Live',
+      seek: 'Seek'
     },
     storage: {
       tips: 'Recorded for {days} days, averaging {daygib} GiB per day. Expected to record for another {days1} days.',
@@ -45,6 +47,8 @@ export default {
     },
     cameras: {
       enter: '进入',
+      live: '实时画面',
+      seek: '回放'
     },
     storage: {
       tips: '已录制 {days} 天，平均每天使用 {daygib} GiB。预计还可以录制 {days1} 天。',

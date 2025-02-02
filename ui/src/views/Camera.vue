@@ -215,9 +215,11 @@ const toSeek = e => {
       </div>
       <div class="change-mode">
         <div class="tab tab1 selected" @click="toLive" ref="toLiveTab">
-          Live
+          {{ $t('cameras.live') }}
         </div>
-        <div class="tab tab2" @click="toSeek" ref="toSeekTab">Seek</div>
+        <div class="tab tab2" @click="toSeek" ref="toSeekTab">
+          {{ $t('cameras.seek') }}
+        </div>
       </div>
       <div v-if="live" class="ptz">
         <div class="btns">
@@ -361,6 +363,7 @@ const toSeek = e => {
 }
 .ptz .btns .btn:hover {
   background-color: #d1d9e0;
+  border-radius: 50%;
 }
 .ptz .btns .btn svg {
   width: 32px;

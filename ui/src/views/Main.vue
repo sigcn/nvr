@@ -53,19 +53,19 @@ function openNav() {
       <nav ref="nav" @click="openNav">
         <ul @click.stop="">
           <li>
-            <RouterLink to="/cameras"
-              ><IconCamera class="icon" />{{ $t('nav.cameras') }}</RouterLink
-            >
+            <RouterLink to="/cameras">
+              <IconCamera class="icon" />{{ $t('nav.cameras') }}
+            </RouterLink>
           </li>
           <li>
-            <RouterLink to="/storage"
-              ><IconStorage class="icon" />{{ $t('nav.storage') }}</RouterLink
-            >
+            <RouterLink to="/storage">
+              <IconStorage class="icon" />{{ $t('nav.storage') }}
+            </RouterLink>
           </li>
           <li>
-            <RouterLink to="/settings"
-              ><IconSettings class="icon" />{{ $t('nav.settings') }}</RouterLink
-            >
+            <RouterLink to="/settings">
+              <IconSettings class="icon" />{{ $t('nav.settings') }}
+            </RouterLink>
           </li>
         </ul>
       </nav>
