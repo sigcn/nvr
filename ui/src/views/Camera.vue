@@ -380,7 +380,7 @@ const toSeek = e => {
     margin: 5px 10px;
   }
   .operation {
-    margin-right: 10px;
+    margin: 10px 10px 0 0;
   }
   .ptz {
     margin: 0 auto;
