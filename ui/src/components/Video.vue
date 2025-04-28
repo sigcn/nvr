@@ -76,8 +76,8 @@ async function init(src, pos, live) {
       media.value.loading = false
     } catch (_) {
       setTimeout(() => {
-        player.value.unload()
-        player.value.detachMediaElement()
+        player.value?.unload()
+        player.value?.detachMediaElement()
         media.value.playing = false
         media.value.loading = false
       }, 100)
@@ -94,8 +94,8 @@ async function play() {
     if (media.value.pos) {
       player.value.pause()
     } else {
-      player.value.unload()
-      player.value.detachMediaElement()
+      player.value?.unload()
+      player.value?.detachMediaElement()
     }
     media.value.playing = false
     return
